@@ -25,14 +25,13 @@ function Sieve (props) {
   };
   const {nRows, nCols, marginWidth, cellWidth, cellHeight} = Object.assign({}, defaultProps, props);
   const layerSpecs = [
-    {factor: 1,  fill: 'white', stroke:'black', text: true},  // layer 1 is white with all numbers visible
-    {factor: 2,  fill: 'rgba(255, 0,   0,   0.25)'},  // layer 2 is clear with translucent red for multiples of 2 ( or cat-eye shapes )
-    {factor: 3,  fill: 'rgba(255, 255, 0,   0.33)'},  // layer 3 is clear with translucent yellow for multiples of 3
-    {factor: 5,  fill: 'rgba(0,   0,   255, 0.25)'},  // layer 5 is clear with translucent blue for multiples of 5
-    {factor: 7,  fill: 'rgba(0,   255, 0,   0.25)'},  // layer 7 is clear with translucent green for multiples of 7
-    {factor: 11, fill: 'rgba(255, 0,   255, 0.25)'},  // layer 11 is clear with translucent purple for multiples of 11
-    {factor: 13, fill: 'rgba(0,   255, 255, 0.25)'},  // layer 13 is clear with translucent orange for multiples of 13
-
+    {factor: 1,  fill: 'white', text: true},  // layer 1 is white with engraved numbers
+    {factor: 2,  fill: 'rgba(255, 0,   0,   0.25)'},  // layer 2 is translucent red with cutouts for non-multiples of 2
+    {factor: 3,  fill: 'rgba(255, 255, 0,   0.33)'},  // layer 3 is translucent yellow with cutouts for non-multiples of 3
+    {factor: 5,  fill: 'rgba(0,   0,   255, 0.25)'},  // layer 5 is translucent blue with cutouts for non-multiples of 5
+    {factor: 7,  fill: 'rgba(0,   255, 0,   0.25)'},  // layer 7 is translucent green with cutouts for non-multiples of 7
+    {factor: 11, fill: 'rgba(255, 0,   255, 0.25)'},  // layer 11 is translucent purple with cutouts for non-multiples of 11
+    {factor: 13, fill: 'rgba(0,   255, 255, 0.25)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
   ];
   const layers = [];
   for (const layerSpec of layerSpecs) {
