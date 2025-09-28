@@ -1,16 +1,16 @@
-import { html, render } from 'https://esm.sh/htm/preact/standalone'
+import { html, render, useState } from 'https://esm.sh/htm/preact/standalone'
 
 function roundRectPath({x, y, width, height, rx, ry}) {
   return [
       `M ${x + rx},${y}`,
       `h ${width - 2*rx}`,
-      `c ${0.5*rx},0 ${rx},${0.5*ry} ${rx},${ry}`,
+      `c ${rx/2},0 ${rx},${ry/2} ${rx},${ry}`,
       `v ${height - 2*ry}`,
-      `c 0,${0.5*rx} ${-0.5*rx},${ry} ${-rx},${ry}`,
+      `c 0,${rx/2} ${-rx/2},${ry} ${-rx},${ry}`,
       `h ${-(width - 2*rx)}`,
-      `c ${-0.5*rx},0 ${-rx},${-0.5*ry} ${-rx},${-ry}`,
+      `c ${-rx/2},0 ${-rx},${-ry/2} ${-rx},${-ry}`,
       `v ${-(height - 2*ry)}`,
-      `c 0,${-0.5*ry} ${0.5*rx},${-ry} ${rx},${-ry}`,
+      `c 0,${-ry/2} ${rx/2},${-ry} ${rx},${-ry}`,
       `Z`,
   ].join(' ');
 }
@@ -32,7 +32,15 @@ function Sieve (props) {
     {factor: 7,  fill: 'rgba(0,   255, 0,   0.25)'},  // layer 7 is translucent green with cutouts for non-multiples of 7
     {factor: 11, fill: 'rgba(255, 0,   255, 0.25)'},  // layer 11 is translucent purple with cutouts for non-multiples of 11
     {factor: 13, fill: 'rgba(0,   255, 255, 0.25)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
+    // {factor: 17, fill: 'rgba(0,   127, 255, 0.25)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
   ];
+  const [confirmGeneration, setConfirmGeneration] = useState(false);
+  if ((nRows * nCols > 4096) && (confirmGeneration == false)) {
+    return html`<p>
+      ${nCols} × ${nRows} table will take some time to generate. <button onClick=${()=>setConfirmGeneration(true)}>Proceed</button>
+    </p>`;
+  }
+
   const layers = [];
   for (const layerSpec of layerSpecs) {
     const {factor} = layerSpec;
@@ -46,8 +54,7 @@ function Sieve (props) {
       })
     ];
     // etched outlines
-    const cellEls = [];
-    const etchPaths = [];
+    const outlinePaths = [];
     // engraved numbers
     const textEls = [];
 
@@ -74,12 +81,12 @@ function Sieve (props) {
 
         if (cellNum == factor && factor != 1) {
           // base factor has a smaller cutout
-          etchPaths.push(cellPath);
+          outlinePaths.push(cellPath);
           cutOutPaths.push(insetCellPath);
         }
         else if (cellNum % factor == 0) {
           // multiples have etched outlines
-          etchPaths.push(cellPath);
+          outlinePaths.push(cellPath);
         }
         else {
           // non-multiples are fully cut out
@@ -98,10 +105,10 @@ function Sieve (props) {
     }
 
     const cutOut = html`<path d=${cutOutPaths.join(' ')} fill-rule="evenodd" fill=${layerSpec.fill} />`;
-    const etch = html`<path d=${etchPaths.join(' ')} fill="transparent" />`; // stroke=${layerSpec.fill}
+    const outline = html`<path d=${outlinePaths.join(' ')} fill="transparent" />`; // stroke=${layerSpec.fill}
     layers.push(html`<g class="factor-layer" id=${'factor-'+layerSpec.factor}>
       ${cutOut}
-      ${etch}
+      ${outline}
       ${textEls}
     </g>`);
   }
@@ -125,4 +132,18 @@ function Sieve (props) {
   `;
 }
 
-render(html`<${Sieve} nRows=${20} nCols=${12} />`, document.body);
+
+function App (props = {}) {
+  const [nRows, setNRows] = useState(20);
+  const [nCols, setNCols] = useState(12);
+  return html`
+    <h1>Sieve of Eratosthenes</h1>
+    <input type="number" size="3" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
+    ${" × "}
+    <input type="number" size="3" name="nRows" value=${nRows} onChange=${function(event){setNRows(parseInt(event.target.value))}} />
+    <input type="color" value="#ff0000" />
+    <br /><br />
+    <${Sieve} nRows=${nRows} nCols=${nCols} />
+  `;
+}
+render(html`<${App} />`, document.body);
