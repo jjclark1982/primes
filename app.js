@@ -146,7 +146,7 @@ function Sieve (props) {
 function App (props = {}) {
   const [nRows, setNRows] = useState(12);
   const [nCols, setNCols] = useState(12);
-  const [cellSize, setCellSize] = useState(80);
+  const [gridSize, setGridSize] = useState(80);
   const [marginWidth, setMarginWidth] = useState(5);
   return html`
     <h1>Sieve of Eratosthenes</h1>
@@ -156,14 +156,14 @@ function App (props = {}) {
       ${" × "}
       <input type="number" size="3" name="nRows" value=${nRows} onChange=${function(event){setNRows(event.target.valueAsNumber)}} />
       ${" "}
-      <label>Cell Size (pt): <input type="number" size="3" name="cellSize" value=${cellSize} onChange=${function(event){setCellSize(event.target.valueAsNumber)}} /></label>
+      <label>Grid Size (pt): <input type="number" size="3" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} /></label>
       ${" "}
       ${" "}
       <label>Margin (pt): <input type="number" size="3" name="marginWidth" value=${marginWidth} onChange=${function(event){setMarginWidth(event.target.valueAsNumber)}} /></label>
       ${" "}
       <button onClick=${downloadSVG}>Download SVG</button>
     </p>
-    <${Sieve} nRows=${nRows} nCols=${nCols} marginWidth=${marginWidth} cellWidth=${cellSize} cellHeight=${cellSize} />
+    <${Sieve} nRows=${nRows} nCols=${nCols} marginWidth=${marginWidth} cellWidth=${gridSize} cellHeight=${gridSize} />
   `;
 }
 
