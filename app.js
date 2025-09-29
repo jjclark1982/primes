@@ -18,10 +18,9 @@ function roundRectPath({x, y, width, height, rx, ry}) {
 function downloadSVG() {
   const svgEl = document.querySelector('svg');
   const blob = new Blob([svgEl.outerHTML], {type: 'image/svg+xml'});
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.setAttribute('href', url);
-  a.setAttribute('download', svgEl.querySelector('title').textContent || 'download');
+  a.setAttribute('href', URL.createObjectURL(blob));
+  a.setAttribute('download', svgEl.querySelector('title')?.textContent || 'download');
   a.click();
 };
 
@@ -72,17 +71,17 @@ function Sieve (props) {
           rx: 3*marginWidth,
           ry: 3*marginWidth
         });
-        const insetCellPath = roundRectPath({
-          x: col*cellWidth + 4*marginWidth,
-          y: row*cellHeight + 4*marginWidth,
-          width: cellWidth - 6*marginWidth,
-          height: cellHeight - 6*marginWidth,
-          rx: 2*marginWidth,
-          ry: 2*marginWidth
-        });
 
         if (cellNum == factor && factor != 1) {
           // base factor has a smaller cutout
+          const insetCellPath = roundRectPath({
+            x: col*cellWidth + 4*marginWidth,
+            y: row*cellHeight + 4*marginWidth,
+            width: cellWidth - 6*marginWidth,
+            height: cellHeight - 6*marginWidth,
+            rx: 2*marginWidth,
+            ry: 2*marginWidth
+          });
           cutOutPaths.push(insetCellPath);
         }
         else if (cellNum % factor != 0) {
