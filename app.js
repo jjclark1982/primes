@@ -55,14 +55,7 @@ function Sieve (props) {
   for (const layerSpec of layerSpecs) {
     const {factor} = layerSpec;
     // solid frame
-    const cutOutPaths = [
-      roundRectPath({
-        x: 0, y: 0,
-        width: nCols*cellWidth + 2*marginWidth, 
-        height: nRows*cellHeight + 2*marginWidth,
-        rx: 4*marginWidth, ry: 4*marginWidth
-      })
-    ];
+    const cutOutPaths = [];
     // etched outlines
     const outlinePaths = [];
 
@@ -106,6 +99,13 @@ function Sieve (props) {
       }
     }
 
+    cutOutPaths.push(roundRectPath({
+      x: 0, y: 0,
+      width: nCols*cellWidth + 2*marginWidth, 
+      height: nRows*cellHeight + 2*marginWidth,
+      rx: 4*marginWidth, ry: 4*marginWidth
+    }));
+
     const cutOut = html`<path d=${cutOutPaths.join(' ')} fill-rule="evenodd" fill=${layerSpec.fill} opacity=${factor == 1 ? 1 : 0.25} style="mix-blend-mode:darken;" />`;
     const outline = layerSpec.showOutlines ? html`<path d=${outlinePaths.join(' ')} fill="rgba(255,255,255,0)" />` : null; // stroke=${layerSpec.fill}
     layers.push(html`<g class="factor-layer" id=${'factor-'+layerSpec.factor}>
@@ -113,7 +113,8 @@ function Sieve (props) {
       ${outline}
     </g>`);
   }
-  // engraved numbers
+
+  // legend with engraved numbers
   const textEls = [];
   for (let row = 0; row < nRows; row++) {
     for (let col = 0; col < nCols; col++) {
@@ -142,14 +143,13 @@ function Sieve (props) {
   `;
 }
 
-
 function App (props = {}) {
   const [nRows, setNRows] = useState(12);
   const [nCols, setNCols] = useState(12);
   const [gridSize, setGridSize] = useState(80);
   const [marginWidth, setMarginWidth] = useState(5);
   return html`
-    <h1>Sieve of Eratosthenes</h1>
+    <h1><a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator</h1>
     <p>
       Table Size:${" "}
       <input type="number" size="3" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
