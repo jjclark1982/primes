@@ -51,11 +51,11 @@ const layerSpecs = [
 
 function Sieve(props) {
   const defaultProps = {
-    nRows: 20,
+    nRows: 12,
     nCols: 12,
-    marginWidth: 4,
-    cellWidth: 72,
-    cellHeight: 72,
+    marginWidth: 6,
+    cellWidth: 96,
+    cellHeight: 96,
   };
   props = Object.assign({}, defaultProps, props);
   const {nRows, nCols, marginWidth, cellWidth, cellHeight} = props;
@@ -95,8 +95,8 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
       const cellNum = (row * nCols) + col + 1;
 
       const cellPath = roundRectPath({
-        x: col*cellWidth + 2*marginWidth,
-        y: row*cellHeight + 2*marginWidth,
+        x: col*cellWidth + marginWidth,
+        y: row*cellHeight + marginWidth,
         width: cellWidth - 2*marginWidth,
         height: cellHeight - 2*marginWidth,
         rx: 3*marginWidth,
@@ -106,8 +106,8 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
       if (cellNum == factor && factor != 1) {
         // base factor has a smaller cutout
         const insetCellPath = roundRectPath({
-          x: col*cellWidth + 4*marginWidth,
-          y: row*cellHeight + 4*marginWidth,
+          x: col*cellWidth + 3*marginWidth,
+          y: row*cellHeight + 3*marginWidth,
           width: cellWidth - 6*marginWidth,
           height: cellHeight - 6*marginWidth,
           rx: 2*marginWidth,
@@ -125,8 +125,8 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
       }
       if (showNumbers) {
         textEls.push(html`<text class="legend-text"
-          x=${(col+0.5)*cellWidth + marginWidth}
-          y=${(row+0.5)*cellHeight + marginWidth + cellHeight/9}
+          x=${(col+0.5)*cellWidth}
+          y=${(row+0.5)*cellHeight + cellHeight/9}
           text-anchor="middle"
         >${cellNum}</text>`);
       }
@@ -134,7 +134,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
   }
 
   const outerFrame = roundRectPath({
-    x: 0, y: 0,
+    x: -marginWidth, y: -marginWidth,
     width: nCols*cellWidth + 2*marginWidth, 
     height: nRows*cellHeight + 2*marginWidth,
     rx: 4*marginWidth, ry: 4*marginWidth
@@ -142,16 +142,16 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
 
   if (factor > 1 && factor <= nCols) {
     cutOutPaths.push(tabPath({
-      x: (factor-1)*cellWidth - 2*marginWidth,
-      y: 0,
+      x: (factor-1)*cellWidth - 3*marginWidth,
+      y: -marginWidth,
       width: cellWidth,
       height: cellHeight/2 + marginWidth,
       rx: 3*marginWidth,
       ry: 3*marginWidth
     }) + outerFrame.replace('M', 'L'));
     textEls.push(html`<text class="legend-text"
-      x=${(factor-0.5)*cellWidth + marginWidth}
-      y=${-cellHeight/6}
+      x=${(factor-0.5)*cellWidth}
+      y=${-cellHeight/6 - marginWidth}
       text-anchor="middle"
     >${factor}</text>`);
   }
@@ -160,7 +160,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
   }
 
   return html`<g class="factor-layer" id=${'factor-'+factor}
-    transform=${`translate(0,${cellHeight/2+marginWidth})`}
+    transform=${`translate(${marginWidth},${cellHeight/2 + 2*marginWidth})`}
     style="mix-blend-mode: darken;"
   >
     <path class="cutout-path"
@@ -190,25 +190,32 @@ function App() {
   const [marginWidth, setMarginWidth] = useState(5);
   const totalWidth = nCols*gridSize + 2*marginWidth;
   const totalHeight = (nRows+0.5)*gridSize + 3*marginWidth;
+  const dimensionsLabel = `Total Size\n${totalWidth} × ${totalHeight} px\n${(totalWidth/96).toFixed(2)} × ${(totalHeight/96).toFixed(2)} in\n${(totalWidth/96*2.54).toFixed(2)} × ${(totalHeight/96*2.54).toFixed(2)} cm`;
   return html`
-    <h1><a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator</h1>
-    <p>
-      Table Size:
-      ${" "}
-      <input type="number" style="width:3.5em;" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
-      ${" × "}
-      <input type="number" style="width:3.5em;" name="nRows" value=${nRows} onChange=${function(event){setNRows(event.target.valueAsNumber)}} />
-      ${" "}
+    <h1>
+      <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
+    </h1>
+    <fieldset style="border: 0; margin: -1em 0 1em 0;">
       <label>
-        <abbr title=${`Total Size\n${totalWidth} × ${totalHeight} px\n${(totalWidth/96).toFixed(2)} × ${(totalHeight/96).toFixed(2)} in\n${(totalWidth/96*2.54).toFixed(2)} × ${(totalHeight/96*2.54).toFixed(2)} cm`}>
-          Grid Size (px): <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} />
-        </abbr>
+        Table Size:
+        ${" "}
+        <input type="number" style="width:3.5em;" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
+        ${" × "}
+        <input type="number" style="width:3.5em;" name="nRows" value=${nRows} onChange=${function(event){setNRows(event.target.valueAsNumber)}} />
+        ${" "}
+      </label>
+      <label>
+        <abbr title=${dimensionsLabel}>
+          Grid Size (px)
+        </abbr>: <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} />
       </label>
       ${" "}
-      <label>Margin (px): <input type="number" style="width:3.5em;" name="marginWidth" value=${marginWidth} onChange=${function(event){setMarginWidth(event.target.valueAsNumber)}} /></label>
+      <label>
+        Margin (px): <input type="number" style="width:3.5em;" name="marginWidth" value=${marginWidth} onChange=${function(event){setMarginWidth(event.target.valueAsNumber)}} />
+      </label>
       ${" "}
       <button onClick=${downloadSVG}>Download SVG</button>
-    </p>
+    </fieldset>
     <${Sieve} nRows=${nRows} nCols=${nCols} marginWidth=${marginWidth} cellWidth=${gridSize} cellHeight=${gridSize} />
   `;
 }
