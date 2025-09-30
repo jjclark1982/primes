@@ -153,10 +153,10 @@ function Sieve (props) {
 
   return html`
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-      viewbox="0 0 ${nCols*cellWidth + 2*marginWidth} ${nRows*cellHeight + 2*marginWidth + cellHeight}"
-      width=${nCols*cellWidth + 2*marginWidth} height=${nRows*cellHeight + 2*marginWidth + cellHeight}
+      viewbox="0 0 ${nCols*cellWidth + 2*marginWidth} ${(nRows+0.5)*cellHeight + 3*marginWidth}"
+      width=${nCols*cellWidth + 2*marginWidth} height=${(nRows+0.5)*cellHeight + 3*marginWidth}
     >
-      <title>Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}pt</title>
+      <title>Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}px</title>
       ${layers}
     </svg>
   `;
@@ -170,15 +170,18 @@ function App (props = {}) {
   return html`
     <h1><a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator</h1>
     <p>
-      Table Size:${" "}
+      <abbr title=${((nCols*gridSize + 2*marginWidth)/96).toFixed(2) + " × " + (((nRows+0.5)*gridSize + 3*marginWidth)/96).toFixed(2) + " in\n" + ((nCols*gridSize + 2*marginWidth)/96*2.54).toFixed(2) + " × " + (((nRows+0.5)*gridSize + 3*marginWidth)/96*2.54).toFixed(2) + " cm"}>
+        Table Size:
+      </abbr>
+      ${" "}
       <input type="number" style="width:3.5em;" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
       ${" × "}
       <input type="number" style="width:3.5em;" name="nRows" value=${nRows} onChange=${function(event){setNRows(event.target.valueAsNumber)}} />
       ${" "}
-      <label>Grid Size (pt): <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} /></label>
+      <label>Grid Size (px): <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} /></label>
       ${" "}
       ${" "}
-      <label>Margin (pt): <input type="number" style="width:3.5em;" name="marginWidth" value=${marginWidth} onChange=${function(event){setMarginWidth(event.target.valueAsNumber)}} /></label>
+      <label>Margin (px): <input type="number" style="width:3.5em;" name="marginWidth" value=${marginWidth} onChange=${function(event){setMarginWidth(event.target.valueAsNumber)}} /></label>
       ${" "}
       <button onClick=${downloadSVG}>Download SVG</button>
     </p>
