@@ -113,7 +113,7 @@ function Sieve (props) {
         if (layerSpec.showNumbers) {
           textEls.push(html`<text class="legend-text"
             x=${(col+0.5)*cellWidth + marginWidth}
-            y=${(row+0.5)*cellHeight + marginWidth}
+            y=${(row+0.5)*cellHeight + marginWidth + cellHeight/9}
           >${cellNum}</text>`);
         }
       }
@@ -130,7 +130,7 @@ function Sieve (props) {
       }));
       textEls.push(html`<text class="legend-text"
         x=${(factor-0.5)*cellWidth + marginWidth}
-        y=${-cellHeight/4}
+        y=${-cellHeight/6}
       >${factor}</text>`);
     }
 
@@ -143,7 +143,7 @@ function Sieve (props) {
 
     const cutOut = html`<path class="cutout-path" d=${cutOutPaths.join(' ')} fill-rule="evenodd" fill=${layerSpec.fill} opacity=${factor == 1 ? 1 : 0.25} style="mix-blend-mode:darken;" />`;
     const outline = layerSpec.showOutlines ? html`<path class="etch-path" d=${outlinePaths.join(' ')} fill="rgba(255,255,255,0)" />` : null; // stroke=${layerSpec.fill}
-    const legend = html`<g class="legend-text" fill="#444" dominant-baseline="central" text-anchor="middle" style="font-size: ${cellHeight/3}px; font-weight: bold; font-family: sans-serif;">${textEls}</g>`
+    const legend = html`<g class="legend-text" fill="#444" text-anchor="middle" style="font-size: ${cellHeight/3}px; font-weight: bold; font-family: sans-serif;">${textEls}</g>`
     layers.push(html`<g class="factor-layer" id=${'factor-'+layerSpec.factor} transform=${`translate(0,${cellHeight/2+marginWidth})`}>
       ${cutOut}
       ${outline}
