@@ -36,124 +36,35 @@ function downloadSVG() {
   a.click();
 };
 
-function Sieve (props) {
+const layerSpecs = [
+  {factor: 1,  fill: 'white', showOutlines: true, showNumbers: true},  // layer 1 is white with engraved labels
+  {factor: 2,  fill: 'rgba(255, 0,   0,   0.75)'},  // layer 2 is translucent red with cutouts for non-multiples of 2
+  {factor: 3,  fill: 'rgba(255, 255, 0,   1.0)'},  // layer 3 is translucent yellow with cutouts for non-multiples of 3
+  {factor: 5,  fill: 'rgba(0,   0,   255, 0.75)'},  // layer 5 is translucent blue with cutouts for non-multiples of 5
+  {factor: 7,  fill: 'rgba(0,   255, 0,   0.75)'},  // layer 7 is translucent green with cutouts for non-multiples of 7
+  {factor: 11, fill: 'rgba(255, 0,   255, 0.75)'},  // layer 11 is translucent purple with cutouts for non-multiples of 11
+  {factor: 13, fill: 'rgba(0,   255, 255, 0.75)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
+  {factor: 17, fill: 'rgba(255, 127, 0,   0.75)'},  // layer 17 is translucent with cutouts for non-multiples of 17
+  {factor: 19, fill: 'rgba(127, 0,   255, 0.75)'},  // layer 19 is translucent with cutouts for non-multiples of 19
+  {factor: 23, fill: 'rgba(0,   127, 255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
+];
+
+function Sieve(props) {
   const defaultProps = {
     nRows: 20,
     nCols: 12,
     marginWidth: 4,
     cellWidth: 72,
     cellHeight: 72,
-    layerSpecs: [
-      {factor: 1,  fill: 'white', showOutlines: true, showNumbers: true},  // layer 1 is white with engraved labels
-      {factor: 2,  fill: 'rgba(255, 0,   0,   0.75)'},  // layer 2 is translucent red with cutouts for non-multiples of 2
-      {factor: 3,  fill: 'rgba(255, 255, 0,   1.0)'},  // layer 3 is translucent yellow with cutouts for non-multiples of 3
-      {factor: 5,  fill: 'rgba(0,   0,   255, 0.75)'},  // layer 5 is translucent blue with cutouts for non-multiples of 5
-      {factor: 7,  fill: 'rgba(0,   255, 0,   0.75)'},  // layer 7 is translucent green with cutouts for non-multiples of 7
-      {factor: 11, fill: 'rgba(255, 0,   255, 0.75)'},  // layer 11 is translucent purple with cutouts for non-multiples of 11
-      {factor: 13, fill: 'rgba(0,   255, 255, 0.75)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
-      {factor: 17, fill: 'rgba(255, 127, 0,   0.75)'},  // layer 17 is translucent with cutouts for non-multiples of 17
-      {factor: 19, fill: 'rgba(127, 0,   255, 0.75)'},  // layer 19 is translucent with cutouts for non-multiples of 19
-      {factor: 23, fill: 'rgba(0,   127, 255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
-    ]
   };
-  const {nRows, nCols, marginWidth, cellWidth, cellHeight, layerSpecs} = Object.assign({}, defaultProps, props);
+  props = Object.assign({}, defaultProps, props);
+  const {nRows, nCols, marginWidth, cellWidth, cellHeight} = props;
+
   const [confirmGeneration, setConfirmGeneration] = useState(false);
   if ((nRows * nCols > 1024) && (confirmGeneration == false)) {
     return html`<p>
       ${nCols} × ${nRows} table will take some time to generate. <button onClick=${()=>setConfirmGeneration(true)}>Proceed</button>
     </p>`;
-  }
-
-  const layers = [];
-  for (const layerSpec of layerSpecs) {
-    const {factor} = layerSpec;
-    if (factor > Math.sqrt(nCols * nRows)) {
-      continue;
-    }
-    // solid frame
-    const cutOutPaths = [];
-    // etched outlines
-    const outlinePaths = [];
-    // engraved numbers
-    const textEls = [];
-
-    for (let row = 0; row < nRows; row++) {
-      for (let col = 0; col < nCols; col++) {
-        const cellNum = (row * nCols) + col + 1;
-
-        const cellPath = roundRectPath({
-          x: col*cellWidth + 2*marginWidth,
-          y: row*cellHeight + 2*marginWidth,
-          width: cellWidth - 2*marginWidth,
-          height: cellHeight - 2*marginWidth,
-          rx: 3*marginWidth,
-          ry: 3*marginWidth
-        });
-
-        if (cellNum == factor && factor != 1) {
-          // base factor has a smaller cutout
-          const insetCellPath = roundRectPath({
-            x: col*cellWidth + 4*marginWidth,
-            y: row*cellHeight + 4*marginWidth,
-            width: cellWidth - 6*marginWidth,
-            height: cellHeight - 6*marginWidth,
-            rx: 2*marginWidth,
-            ry: 2*marginWidth
-          });
-          cutOutPaths.push(insetCellPath);
-        }
-        else if (cellNum % factor != 0) {
-          // non-multiples are fully cut out
-          cutOutPaths.push(cellPath);
-        }
-        else {
-          // multiples have etched outlines
-          outlinePaths.push(cellPath);
-        }
-        if (layerSpec.showNumbers) {
-          textEls.push(html`<text class="legend-text"
-            x=${(col+0.5)*cellWidth + marginWidth}
-            y=${(row+0.5)*cellHeight + marginWidth + cellHeight/9}
-            text-anchor="middle"
-          >${cellNum}</text>`);
-        }
-      }
-    }
-
-    const outerFrame = roundRectPath({
-      x: 0, y: 0,
-      width: nCols*cellWidth + 2*marginWidth, 
-      height: nRows*cellHeight + 2*marginWidth,
-      rx: 4*marginWidth, ry: 4*marginWidth
-    });
-
-    if (factor > 1 && factor <= nCols) {
-      cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 2*marginWidth,
-        y: 0,
-        width: cellWidth,
-        height: cellHeight/2 + marginWidth,
-        rx: 3*marginWidth,
-        ry: 3*marginWidth
-      }) + outerFrame.replace('M', 'L'));
-      textEls.push(html`<text class="legend-text"
-        x=${(factor-0.5)*cellWidth + marginWidth}
-        y=${-cellHeight/6}
-        text-anchor="middle"
-      >${factor}</text>`);
-    }
-    else {
-      cutOutPaths.push(outerFrame);
-    }
-
-    const cutOut = html`<path class="cutout-path" d=${cutOutPaths.join(' ')} fill-rule="evenodd" fill=${layerSpec.fill} opacity=${factor == 1 ? 1 : 1/3} style="mix-blend-mode:darken;" />`;
-    const outline = layerSpec.showOutlines ? html`<path class="etch-path" d=${outlinePaths.join(' ')} fill="rgba(255,255,255,0)" />` : null; // stroke=${layerSpec.fill}
-    const legend = html`<g class="legend-text" fill="#444" style="font-size: ${cellHeight/3}px; font-weight: bold; font-family: sans-serif;">${textEls}</g>`
-    layers.push(html`<g class="factor-layer" id=${'factor-'+layerSpec.factor} transform=${`translate(0,${cellHeight/2+marginWidth})`}>
-      ${cutOut}
-      ${outline}
-      ${legend}
-    </g>`);
   }
 
   return html`
@@ -162,9 +73,114 @@ function Sieve (props) {
       width=${nCols*cellWidth + 2*marginWidth} height=${(nRows+0.5)*cellHeight + 3*marginWidth}
     >
       <title>Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}px</title>
-      ${layers}
+      ${layerSpecs.map((layerSpec)=>SieveLayer({...props, ...layerSpec}))}
     </svg>
   `;
+}
+
+function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, fill, showOutlines, showNumbers}) {
+  if (factor > Math.sqrt(nCols * nRows)) {
+    // skip redundant layers
+    return null;
+  }
+  // solid frame
+  const cutOutPaths = [];
+  // etched outlines
+  const outlinePaths = [];
+  // engraved numbers
+  const textEls = [];
+
+  for (let row = 0; row < nRows; row++) {
+    for (let col = 0; col < nCols; col++) {
+      const cellNum = (row * nCols) + col + 1;
+
+      const cellPath = roundRectPath({
+        x: col*cellWidth + 2*marginWidth,
+        y: row*cellHeight + 2*marginWidth,
+        width: cellWidth - 2*marginWidth,
+        height: cellHeight - 2*marginWidth,
+        rx: 3*marginWidth,
+        ry: 3*marginWidth
+      });
+
+      if (cellNum == factor && factor != 1) {
+        // base factor has a smaller cutout
+        const insetCellPath = roundRectPath({
+          x: col*cellWidth + 4*marginWidth,
+          y: row*cellHeight + 4*marginWidth,
+          width: cellWidth - 6*marginWidth,
+          height: cellHeight - 6*marginWidth,
+          rx: 2*marginWidth,
+          ry: 2*marginWidth
+        });
+        cutOutPaths.push(insetCellPath);
+      }
+      else if (cellNum % factor != 0) {
+        // non-multiples are fully cut out
+        cutOutPaths.push(cellPath);
+      }
+      else {
+        // multiples have etched outlines
+        outlinePaths.push(cellPath);
+      }
+      if (showNumbers) {
+        textEls.push(html`<text class="legend-text"
+          x=${(col+0.5)*cellWidth + marginWidth}
+          y=${(row+0.5)*cellHeight + marginWidth + cellHeight/9}
+          text-anchor="middle"
+        >${cellNum}</text>`);
+      }
+    }
+  }
+
+  const outerFrame = roundRectPath({
+    x: 0, y: 0,
+    width: nCols*cellWidth + 2*marginWidth, 
+    height: nRows*cellHeight + 2*marginWidth,
+    rx: 4*marginWidth, ry: 4*marginWidth
+  });
+
+  if (factor > 1 && factor <= nCols) {
+    cutOutPaths.push(tabPath({
+      x: (factor-1)*cellWidth - 2*marginWidth,
+      y: 0,
+      width: cellWidth,
+      height: cellHeight/2 + marginWidth,
+      rx: 3*marginWidth,
+      ry: 3*marginWidth
+    }) + outerFrame.replace('M', 'L'));
+    textEls.push(html`<text class="legend-text"
+      x=${(factor-0.5)*cellWidth + marginWidth}
+      y=${-cellHeight/6}
+      text-anchor="middle"
+    >${factor}</text>`);
+  }
+  else {
+    cutOutPaths.push(outerFrame);
+  }
+
+  return html`<g class="factor-layer" id=${'factor-'+factor}
+    transform=${`translate(0,${cellHeight/2+marginWidth})`}
+    style="mix-blend-mode: darken;"
+  >
+    <path class="cutout-path"
+      d=${cutOutPaths.join(' ')}
+      fill-rule="evenodd"
+      fill=${fill}
+      opacity=${factor == 1 ? 1 : 1/3}
+    />
+    <path class="etch-path"
+      d=${outlinePaths.join(' ')}
+      fill="rgba(255,255,255,0)"
+      stroke=${showOutlines ? fill : ''}
+    />
+    <g class="legend-text"
+      fill="#444"
+      style="font-size: ${cellHeight/3}px; font-weight: bold; font-family: sans-serif;"
+    >
+      ${textEls}
+    </g>
+  </g>`;
 }
 
 function App() {
