@@ -51,9 +51,9 @@ function Sieve (props) {
       {factor: 7,  fill: 'rgba(0,   255, 0,   0.75)'},  // layer 7 is translucent green with cutouts for non-multiples of 7
       {factor: 11, fill: 'rgba(255, 0,   255, 0.75)'},  // layer 11 is translucent purple with cutouts for non-multiples of 11
       {factor: 13, fill: 'rgba(0,   255, 255, 0.75)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
-      {factor: 17, fill: 'rgba(0,   127, 255, 0.75)'},  // layer 17 is translucent with cutouts for non-multiples of 17
-      {factor: 19, fill: 'rgba(255, 127, 0,   0.75)'},  // layer 19 is translucent with cutouts for non-multiples of 19
-      {factor: 23, fill: 'rgba(127, 0,   255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
+      {factor: 17, fill: 'rgba(255, 127, 0,   0.75)'},  // layer 17 is translucent with cutouts for non-multiples of 17
+      {factor: 19, fill: 'rgba(127, 0,   255, 0.75)'},  // layer 19 is translucent with cutouts for non-multiples of 19
+      {factor: 23, fill: 'rgba(0,   127, 255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
     ]
   };
   const {nRows, nCols, marginWidth, cellWidth, cellHeight, layerSpecs} = Object.assign({}, defaultProps, props);
