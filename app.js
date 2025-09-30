@@ -29,10 +29,11 @@ function tabPath({x, y, width, height, rx, ry}) {
 
 function downloadSVG() {
   const svgEl = document.querySelector('svg');
+  const title = (svgEl.querySelector('title')?.textContent || 'download').split('\n')[0];
   const blob = new Blob([svgEl.outerHTML], {type: 'image/svg+xml'});
   const a = document.createElement('a');
   a.setAttribute('href', URL.createObjectURL(blob));
-  a.setAttribute('download', svgEl.querySelector('title')?.textContent || 'download');
+  a.setAttribute('download', title);
   a.click();
 };
 
@@ -67,12 +68,22 @@ function Sieve(props) {
     </p>`;
   }
 
+  const totalWidth = nCols*cellWidth + 2*marginWidth;
+  const totalHeight = (nRows+0.5)*cellHeight + 3*marginWidth;
+  const title = [
+    `Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}px`,
+    '',
+    `Total Size\n${totalWidth} × ${totalHeight} px`,
+    `${(totalWidth/96).toFixed(2)} × ${(totalHeight/96).toFixed(2)} in`,
+    `${(totalWidth/96*2.54).toFixed(2)} × ${(totalHeight/96*2.54).toFixed(2)} cm`,
+  ].join('\n');
+
   return html`
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-      viewbox="0 0 ${nCols*cellWidth + 2*marginWidth} ${(nRows+0.5)*cellHeight + 3*marginWidth}"
-      width=${nCols*cellWidth + 2*marginWidth} height=${(nRows+0.5)*cellHeight + 3*marginWidth}
+      viewbox="0 0 ${totalWidth} ${totalHeight}"
+      width=${totalWidth} height=${totalHeight}
     >
-      <title>Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}px</title>
+      <title>${title}</title>
       ${layerSpecs.map((layerSpec)=>SieveLayer({...props, ...layerSpec}))}
     </svg>
   `;
@@ -148,7 +159,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
       height: cellHeight/2 + marginWidth,
       rx: 3*marginWidth,
       ry: 3*marginWidth
-    }) + outerFrame.replace('M', 'L'));
+    }) + outerFrame.replace('M', ' L'));
     textEls.push(html`<text class="legend-text"
       x=${(factor-0.5)*cellWidth}
       y=${-cellHeight/6 - marginWidth}
@@ -188,9 +199,6 @@ function App() {
   const [nCols, setNCols] = useState(12);
   const [gridSize, setGridSize] = useState(80);
   const [marginWidth, setMarginWidth] = useState(5);
-  const totalWidth = nCols*gridSize + 2*marginWidth;
-  const totalHeight = (nRows+0.5)*gridSize + 3*marginWidth;
-  const dimensionsLabel = `Total Size\n${totalWidth} × ${totalHeight} px\n${(totalWidth/96).toFixed(2)} × ${(totalHeight/96).toFixed(2)} in\n${(totalWidth/96*2.54).toFixed(2)} × ${(totalHeight/96*2.54).toFixed(2)} cm`;
   return html`
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
@@ -202,12 +210,10 @@ function App() {
         <input type="number" style="width:3.5em;" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
         ${" × "}
         <input type="number" style="width:3.5em;" name="nRows" value=${nRows} onChange=${function(event){setNRows(event.target.valueAsNumber)}} />
-        ${" "}
       </label>
+      ${" "}
       <label>
-        <abbr title=${dimensionsLabel}>
-          Grid Size (px)
-        </abbr>: <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} />
+        Grid Size (px): <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} />
       </label>
       ${" "}
       <label>
