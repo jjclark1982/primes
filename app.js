@@ -80,7 +80,7 @@ function Sieve(props) {
 
   return html`
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-      viewbox="${-marginWidth} ${-cellHeight/2 - 2*marginWidth} ${totalWidth} ${totalHeight}"
+      viewbox="0 0 ${totalWidth} ${totalHeight}"
       width=${totalWidth} height=${totalHeight}
     >
       <title>${title}</title>
@@ -170,7 +170,10 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
     cutOutPaths.push(outerFrame);
   }
 
-  return html`<g class="factor-layer" id=${'factor-'+factor} style="mix-blend-mode: darken;">
+  return html`<g class="factor-layer" id=${'factor-'+factor}
+    transform=${`translate(${marginWidth},${cellHeight/2 + 2*marginWidth})`}
+    style="mix-blend-mode: darken;"
+  >
     <path class="cutout-path"
       d=${cutOutPaths.join(' ')}
       fill-rule="evenodd"
