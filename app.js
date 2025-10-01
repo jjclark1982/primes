@@ -29,11 +29,11 @@ function tabPath({x, y, width, height, rx, ry}) {
 
 function downloadSVG() {
   const svgEl = document.querySelector('svg');
-  const title = (svgEl.querySelector('title')?.textContent || 'download').split('\n')[0];
+  const filename = (svgEl.querySelector('title')?.textContent || 'download').split('\n')[0];
   const blob = new Blob([svgEl.outerHTML], {type: 'image/svg+xml'});
   const a = document.createElement('a');
   a.setAttribute('href', URL.createObjectURL(blob));
-  a.setAttribute('download', title);
+  a.setAttribute('download', filename);
   a.click();
 };
 
