@@ -1,4 +1,4 @@
-import { html, render, useState } from 'https://esm.sh/htm/preact/standalone'
+import { html, render, useState, useEffect } from 'https://esm.sh/htm/preact/standalone'
 
 function roundRectPath({x, y, width, height, rx, ry}) {
   return [
@@ -28,7 +28,7 @@ function tabPath({x, y, width, height, rx, ry}) {
 }
 
 function downloadSVG() {
-  const svgEl = document.querySelector('svg');
+  const svgEl = Array.from(document.querySelectorAll('svg')).at(-1);
   const filename = (svgEl.querySelector('title')?.textContent || 'download').split('\n')[0];
   const blob = new Blob([svgEl.outerHTML], {type: 'image/svg+xml'});
   const a = document.createElement('a');
@@ -78,15 +78,25 @@ function Sieve(props) {
     `${(totalWidth/96*2.54).toFixed(2)} × ${(totalHeight/96*2.54).toFixed(2)} cm`,
   ].join('\n');
 
-  return html`
+  const layers = layerSpecs.map((layerSpec)=>SieveLayer({...props, ...layerSpec}));
+
+  return html`<div style="transform-style: preserve-3d; transform: translateZ(${0}px);">
+    ${layers.map((layer, i)=>html`
+      <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="position: absolute; transform: translateZ(${i+1}px)";
+        viewbox="0 0 ${totalWidth} ${totalHeight}"
+        width=${totalWidth} height=${totalHeight}
+      >
+        ${layer}
+      </svg>
+    `)}
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
       viewbox="0 0 ${totalWidth} ${totalHeight}"
       width=${totalWidth} height=${totalHeight}
     >
       <title>${title}</title>
-      ${layerSpecs.map((layerSpec)=>SieveLayer({...props, ...layerSpec}))}
+      ${layers}
     </svg>
-  `;
+  </div>`;
 }
 
 function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, fill, showOutlines, showNumbers}) {
@@ -199,6 +209,18 @@ function App() {
   const [nCols, setNCols] = useState(12);
   const [gridSize, setGridSize] = useState(80);
   const [marginWidth, setMarginWidth] = useState(5);
+
+  useEffect(()=>{
+    document.onmousemove = (event)=>{
+      var Xperc = event.pageX / window.innerWidth;
+      var Yperc = event.pageY / window.innerHeight;
+      document.body.style.perspectiveOrigin = `${100*(1-Xperc)}% ${100*(1-Yperc)}%`;
+    };
+    return ()=>{
+      document.onmousemove = null;
+    }
+  }, []);
+
   return html`
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
