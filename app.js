@@ -1,5 +1,8 @@
 import { html, render, useState } from 'https://esm.sh/htm/preact/standalone'
 
+// Generate SVG path data for a rounded rectangle.
+// (Samee parameters as the <rect> element.)
+// Starts at the top right and ends at the top left, so it can be easily joined to tab paths.
 function roundRectPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x + width - rx},${y}`,
@@ -14,6 +17,7 @@ function roundRectPath({x, y, width, height, rx, ry}) {
   ].join(' ');
 }
 
+// Generate SVG path data for a rounded "tab" that can extend from the top of a rectangle.
 function tabPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x},${y}`,
@@ -27,6 +31,7 @@ function tabPath({x, y, width, height, rx, ry}) {
   ].join(' ');
 }
 
+// Download the first <SVG> element on the page.
 function downloadSVG() {
   const svgEl = document.querySelector('svg');
   const filename = (svgEl.querySelector('title')?.textContent || 'download').split('\n')[0];
@@ -47,7 +52,9 @@ const layerSpecs = [
   {factor: 13, fill: 'rgba(0,   255, 255, 0.75)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
   {factor: 17, fill: 'rgba(255, 127, 0,   0.75)'},  // layer 17 is translucent with cutouts for non-multiples of 17
   {factor: 19, fill: 'rgba(127, 0,   255, 0.75)'},  // layer 19 is translucent with cutouts for non-multiples of 19
-  {factor: 23, fill: 'rgba(0,   127, 255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
+  {factor: 23, fill: 'rgba(63,  127, 255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
+  {factor: 29, fill: 'rgba(127, 255, 63,  0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
+  {factor: 31, fill: 'rgba(255, 63,  127, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
 ];
 
 function Sieve(props) {
@@ -203,6 +210,9 @@ function App() {
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
     </h1>
+    <div style="position: fixed; bottom: 1em; right: 1em;">
+      <a href="https://github.com/jjclark1982/primes" title="Feedback">π</a>
+    </div>
     <fieldset style="border: 0; margin: -1em 0 1em 0;">
       <label>
         Table Size:
