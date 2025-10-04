@@ -44,17 +44,18 @@ function downloadSVG() {
 
 const layerSpecs = [
   {factor: 1,  fill: 'white', showOutlines: true, showNumbers: true},  // layer 1 is white with engraved labels
-  {factor: 2,  fill: 'rgba(255, 0,   0,   0.75)'},  // layer 2 is translucent red with cutouts for non-multiples of 2
-  {factor: 3,  fill: 'rgba(255, 255, 0,   1.0)'},  // layer 3 is translucent yellow with cutouts for non-multiples of 3
-  {factor: 5,  fill: 'rgba(0,   0,   255, 0.75)'},  // layer 5 is translucent blue with cutouts for non-multiples of 5
-  {factor: 7,  fill: 'rgba(0,   255, 0,   0.75)'},  // layer 7 is translucent green with cutouts for non-multiples of 7
-  {factor: 11, fill: 'rgba(255, 0,   255, 0.75)'},  // layer 11 is translucent purple with cutouts for non-multiples of 11
-  {factor: 13, fill: 'rgba(0,   255, 255, 0.75)'},  // layer 13 is translucent orange with cutouts for non-multiples of 13
-  {factor: 17, fill: 'rgba(255, 127, 0,   0.75)'},  // layer 17 is translucent with cutouts for non-multiples of 17
-  {factor: 19, fill: 'rgba(127, 0,   255, 0.75)'},  // layer 19 is translucent with cutouts for non-multiples of 19
-  {factor: 23, fill: 'rgba(63,  127, 255, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
-  {factor: 29, fill: 'rgba(127, 255, 63,  0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
-  {factor: 31, fill: 'rgba(255, 63,  127, 0.75)'},  // layer 23 is translucent with cutouts for non-multiples of 23
+  {factor: 2,  fill: 'rgba(0  , 255, 255, 0.75)'},  // layer 2 is translucent cyan with cutouts for non-multiples of 2
+  {factor: 3,  fill: 'rgba(255, 0  , 255, 0.75)'},  // layer 3 is translucent magenta with cutouts for non-multiples of 3
+  {factor: 5,  fill: 'rgb( 255, 255, 0        )'},  // layer 5 is translucent yellow with cutouts for non-multiples of 5
+  {factor: 7,  fill: 'rgba(0  , 0  , 255, 0.75)'},  // layer 7 is translucent blue with cutouts for non-multiples of 7
+  {factor: 11, fill: 'rgba(255, 0  , 0  , 0.75)'},  // layer 11 is translucent red with cutouts for non-multiples of 11
+  {factor: 13, fill: 'rgba(0  , 255, 0  , 0.75)'},  // layer 13 is translucent green with cutouts for non-multiples of 13
+  {factor: 17, fill: 'rgba(255, 0  , 127, 0.75)'},
+  {factor: 23, fill: 'rgba(127, 255, 0  , 0.75)'},
+  {factor: 19, fill: 'rgba(0  , 127, 255, 0.75)'},
+  {factor: 29, fill: 'rgba(255, 127, 0  , 0.75)'},
+  {factor: 31, fill: 'rgba(0  , 255, 127, 0.75)'},
+  {factor: 37, fill: 'rgba(127, 0  , 255, 0.75)'},
 ];
 
 function Sieve(props) {
