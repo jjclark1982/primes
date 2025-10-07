@@ -195,14 +195,28 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
   });
 
   if (factor > 1 && factor <= nCols) {
-    cutOutPaths.push(tabPath({
-      x: (factor-1)*cellWidth - 3*marginWidth,
-      y: -marginWidth,
-      width: cellWidth,
-      height: cellHeight/2 + marginWidth,
-      rx: 3*marginWidth,
-      ry: 3*marginWidth
-    }) + outerFrame.replace('M', ' L'));
+    if (factor == nCols) {
+      // slightly wider tab in the rightmost position
+      cutOutPaths.push(tabPath({
+        x: (factor-1)*cellWidth - 3*marginWidth,
+        y: -marginWidth,
+        width: cellWidth + marginWidth,
+        height: cellHeight/2 + marginWidth,
+        rx: 3*marginWidth,
+        ry: 3*marginWidth
+      }).replace(/c[^c]*$/, '') + outerFrame.replace(/.*?v/, `v ${7*marginWidth} v`));
+    }
+    else {
+      // standard tab is exactly as wide as the grid
+      cutOutPaths.push(tabPath({
+        x: (factor-1)*cellWidth - 3*marginWidth,
+        y: -marginWidth,
+        width: cellWidth,
+        height: cellHeight/2 + marginWidth,
+        rx: 3*marginWidth,
+        ry: 3*marginWidth
+      }) + outerFrame.replace('M', ' L'));
+    }
     textEls.push(html`<text class="legend-text"
       x=${(factor-0.5)*cellWidth}
       y=${-cellHeight/6 - marginWidth}
