@@ -310,7 +310,7 @@ function App() {
       ${" "}
       <${NumberInput} name="gridSize" label="Grid Size" unit="px" value=${gridSize} setValue=${setGridSize} />
       ${" "}
-      <${NumberInput} name="marginWidth" label="Grid Size" unit="px" value=${marginWidth} setValue=${setMarginWidth} />
+      <${NumberInput} name="marginWidth" label="Margin Size" unit="px" value=${marginWidth} setValue=${setMarginWidth} />
       <br />
       <${NumberInput} name="nHolePunch" label="Hole Punch" value=${nHolePunch} setValue=${setNHolePunch} />
       ${" "}
