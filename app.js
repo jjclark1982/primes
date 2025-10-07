@@ -97,12 +97,16 @@ function Sieve(props) {
   const defaultProps = {
     nRows: 12,
     nCols: 12,
-    marginWidth: 6,
+    marginWidth: 5.66, // 1.5 mm
     cellWidth: 96,
     cellHeight: 96,
+    nHolePunch: 3,
+    holePunchSize: 32, // 1/3 inch
+    holePunchSpacing: 4.25*96, // US Letter 3-ring binder spacing is 4.25 inches
+                               // 8 * 96/2.54 // Euro A4 binder spacing is 8 cm
   };
   props = Object.assign({}, defaultProps, props);
-  const {nRows, nCols, marginWidth, cellWidth, cellHeight} = props;
+  const {nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize} = props;
 
   const [confirmGeneration, setConfirmGeneration] = useState(false);
   if ((nRows * nCols > 1024) && (confirmGeneration == false)) {
@@ -112,7 +116,7 @@ function Sieve(props) {
   }
 
   const totalWidth = nCols*cellWidth + 2*marginWidth;
-  const totalHeight = (nRows+0.5)*cellHeight + 3*marginWidth;
+  const totalHeight = (nRows+0.5)*cellHeight + 3*marginWidth + (nHolePunch > 0)*(holePunchSize + 2*marginWidth);
   const title = [
     `Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}px`,
     '',
@@ -127,12 +131,12 @@ function Sieve(props) {
       width=${totalWidth} height=${totalHeight}
     >
       <title>${title}</title>
-      ${layerSpecs.map((layerSpec)=>SieveLayer({...props, ...layerSpec}))}
+      ${layerSpecs.map((layerSpec)=>SieveLayer({makeBeads: true, ...props, ...layerSpec}))}
     </svg>
   `;
 }
 
-function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, fill, showOutlines, showNumbers}) {
+function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, factor, fill, showOutlines, showNumbers}) {
   if (factor > Math.sqrt(nCols * nRows)) {
     // skip redundant layers
     return null;
@@ -174,7 +178,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
         cutOutPaths.push(cellPath);
       }
       else {
-        // multiples have etched outlines
+        // multiples have etched outlines, optionally
         outlinePaths.push(cellPath);
       }
       if (showNumbers) {
@@ -187,10 +191,21 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
     }
   }
 
+  const footerHeight = (nHolePunch > 0) ? holePunchSize + 2*marginWidth : 0;
+  if (nHolePunch > 0) {
+    const startX = (nCols/2)*cellWidth - holePunchSpacing * (nHolePunch-1)/2;
+    for (let i = 0; i < nHolePunch; i++) {
+      cutOutPaths.push(circlePath({
+        cx: startX + i*holePunchSpacing, cy: (nRows*cellHeight) + marginWidth + holePunchSize/2,
+        rx: holePunchSize/2, ry: holePunchSize/2
+      }));
+    }
+  }
+
   const outerFrame = roundRectPath({
     x: -marginWidth, y: -marginWidth,
     width: nCols*cellWidth + 2*marginWidth, 
-    height: nRows*cellHeight + 2*marginWidth,
+    height: nRows*cellHeight + 2*marginWidth + footerHeight,
     rx: 4*marginWidth, ry: 4*marginWidth
   });
 
@@ -251,11 +266,36 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, factor, f
   </g>`;
 }
 
+function NumberInput({label, name, value, setValue, unit}) {
+  let unitLabel = null;
+  if (unit == 'px') {
+    const unitTitle = `1 px = 1/96 inch\n${value} px = ${(value/96).toFixed(3)} inch\n${value} px = ${(value*2.54/96).toFixed(3)} cm`;
+    unitLabel = html`
+    ${" "}
+    <abbr title=${unitTitle}>(px)</abbr>
+    `;
+  }
+  const inputEl = html`<input type="number" style="width:3.5em;" name=${name} value=${value} onChange=${function(event){setValue(event.target.valueAsNumber)}} />`;
+  if (label) {
+    return (html`
+      <label>
+        ${label}${unitLabel}: ${inputEl}
+      </label>
+    `)
+  }
+  else {
+    return inputEl;
+  }
+}
+
 function App() {
   const [nRows, setNRows] = useState(12);
   const [nCols, setNCols] = useState(12);
   const [gridSize, setGridSize] = useState(80);
   const [marginWidth, setMarginWidth] = useState(5);
+  const [nHolePunch, setNHolePunch] = useState(3);
+  const [holePunchSize, setHolePunchSize] = useState(32);
+  const [holePunchSpacing, setHolePunchSpacing] = useState(4.25*96);
   return html`
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
@@ -264,25 +304,27 @@ function App() {
       <a href="https://github.com/jjclark1982/primes" title="Feedback">π</a>
     </div>
     <fieldset style="border: 0; margin: -1em 0 1em 0;">
-      <label>
-        Table Size:
-        ${" "}
-        <input type="number" style="width:3.5em;" name="nCols" value=${nCols} onChange=${function(event){setNCols(event.target.valueAsNumber)}} />
-        ${" × "}
-        <input type="number" style="width:3.5em;" name="nRows" value=${nRows} onChange=${function(event){setNRows(event.target.valueAsNumber)}} />
-      </label>
+      <${NumberInput} name="nCols" label="Table Size" value=${nCols} setValue=${setNCols} />
+      ${" × "}
+      <${NumberInput} name="nRows" value=${nRows} setValue=${setNRows} />
       ${" "}
-      <label>
-        Grid Size (px): <input type="number" style="width:3.5em;" name="gridSize" value=${gridSize} onChange=${function(event){setGridSize(event.target.valueAsNumber)}} />
-      </label>
+      <${NumberInput} name="gridSize" label="Grid Size" unit="px" value=${gridSize} setValue=${setGridSize} />
       ${" "}
-      <label>
-        Margin (px): <input type="number" style="width:3.5em;" name="marginWidth" value=${marginWidth} onChange=${function(event){setMarginWidth(event.target.valueAsNumber)}} />
-      </label>
+      <${NumberInput} name="marginWidth" label="Grid Size" unit="px" value=${marginWidth} setValue=${setMarginWidth} />
+      <br />
+      <${NumberInput} name="nHolePunch" label="Hole Punch" value=${nHolePunch} setValue=${setNHolePunch} />
+      ${" "}
+      <${NumberInput} name="holePunchSize" label="Size" unit="px" value=${holePunchSize} setValue=${setHolePunchSize} />
+      ${" "}
+      <${NumberInput} name="holePunchSpacing" label="Spacing" unit="px" value=${holePunchSpacing} setValue=${setHolePunchSpacing} />
       ${" "}
       <button onClick=${downloadSVG}>Download SVG</button>
     </fieldset>
-    <${Sieve} nRows=${nRows} nCols=${nCols} marginWidth=${marginWidth} cellWidth=${gridSize} cellHeight=${gridSize} />
+    <${Sieve}
+      nRows=${nRows} nCols=${nCols}
+      marginWidth=${marginWidth} cellWidth=${gridSize} cellHeight=${gridSize}
+      nHolePunch=${nHolePunch} holePunchSize=${holePunchSize} holePunchSpacing=${holePunchSpacing}
+    />
   `;
 }
 
