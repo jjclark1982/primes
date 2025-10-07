@@ -97,7 +97,7 @@ function Sieve(props) {
   const defaultProps = {
     nRows: 12,
     nCols: 12,
-    marginWidth: 5.66, // 1.5 mm
+    marginSize: 5.66, // 1.5 mm
     cellWidth: 84, // 7/8 inch
     cellHeight: 84,
     nHolePunch: 3,
@@ -107,7 +107,7 @@ function Sieve(props) {
     makeBeads: true,
   };
   props = Object.assign({}, defaultProps, props);
-  const {nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize} = props;
+  const {nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize} = props;
 
   const [confirmGeneration, setConfirmGeneration] = useState(false);
   if ((nRows * nCols > 1024) && (confirmGeneration == false)) {
@@ -116,10 +116,10 @@ function Sieve(props) {
     </p>`;
   }
 
-  const totalWidth = nCols*cellWidth + 2*marginWidth;
-  const totalHeight = (nRows+0.5)*cellHeight + 3*marginWidth + (nHolePunch > 0)*(holePunchSize + 2*marginWidth);
+  const totalWidth = nCols*cellWidth + 2*marginSize;
+  const totalHeight = (nRows+0.5)*cellHeight + 3*marginSize + (nHolePunch > 0)*(holePunchSize + 2*marginSize);
   const title = [
-    `Sieve ${nCols}x${nRows} ${cellWidth}+${marginWidth}px`,
+    `Sieve ${nCols}x${nRows} ${cellWidth}+${marginSize}px`,
     '',
     `Total Size\n${totalWidth} × ${totalHeight} px`,
     `${(totalWidth/96).toFixed(2)} × ${(totalHeight/96).toFixed(2)} in`,
@@ -137,7 +137,7 @@ function Sieve(props) {
   `;
 }
 
-function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, factor, fill, showOutlines, showNumbers, makeBeads}) {
+function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, factor, fill, showOutlines, showNumbers, makeBeads}) {
   if (factor > Math.sqrt(nCols * nRows)) {
     // skip redundant layers
     return null;
@@ -155,23 +155,23 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
       const cellNum = (row * nCols) + col + 1;
 
       const cellPath = roundRectPath({
-        x: col*cellWidth + marginWidth,
-        y: row*cellHeight + marginWidth,
-        width: cellWidth - 2*marginWidth,
-        height: cellHeight - 2*marginWidth,
-        rx: 3*marginWidth,
-        ry: 3*marginWidth
+        x: col*cellWidth + marginSize,
+        y: row*cellHeight + marginSize,
+        width: cellWidth - 2*marginSize,
+        height: cellHeight - 2*marginSize,
+        rx: 3*marginSize,
+        ry: 3*marginSize
       });
 
       if (cellNum == factor && factor != 1) {
         // base factor has a smaller cutout
         const insetCellPath = roundRectPath({
-          x: col*cellWidth + 3*marginWidth,
-          y: row*cellHeight + 3*marginWidth,
-          width: cellWidth - 6*marginWidth,
-          height: cellHeight - 6*marginWidth,
-          rx: 2*marginWidth,
-          ry: 2*marginWidth
+          x: col*cellWidth + 3*marginSize,
+          y: row*cellHeight + 3*marginSize,
+          width: cellWidth - 6*marginSize,
+          height: cellHeight - 6*marginSize,
+          rx: 2*marginSize,
+          ry: 2*marginSize
         });
         cutOutPaths.push(insetCellPath);
       }
@@ -179,9 +179,9 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
         // non-multiples are fully cut out
         cutOutPaths.push(cellPath);
         beadEls.push(html`<circle
-          cx=${col*cellWidth + 5*marginWidth}
-          cy=${row*cellHeight + 5*marginWidth}
-          r=${2*marginWidth}
+          cx=${col*cellWidth + 5*marginSize}
+          cy=${row*cellHeight + 5*marginSize}
+          r=${2*marginSize}
         />`);
       }
       else {
@@ -198,50 +198,50 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
     }
   }
 
-  const footerHeight = (nHolePunch > 0) ? holePunchSize + 2*marginWidth : 0;
+  const footerHeight = (nHolePunch > 0) ? holePunchSize + 2*marginSize : 0;
   if (nHolePunch > 0) {
     const startX = (nCols/2)*cellWidth - holePunchSpacing * (nHolePunch-1)/2;
     for (let i = 0; i < nHolePunch; i++) {
       cutOutPaths.push(circlePath({
-        cx: startX + i*holePunchSpacing, cy: (nRows*cellHeight) + marginWidth + holePunchSize/2,
+        cx: startX + i*holePunchSpacing, cy: (nRows*cellHeight) + marginSize + holePunchSize/2,
         rx: holePunchSize/2, ry: holePunchSize/2
       }));
     }
   }
 
   const outerFrame = roundRectPath({
-    x: -marginWidth, y: -marginWidth,
-    width: nCols*cellWidth + 2*marginWidth, 
-    height: nRows*cellHeight + 2*marginWidth + footerHeight,
-    rx: 4*marginWidth, ry: 4*marginWidth
+    x: -marginSize, y: -marginSize,
+    width: nCols*cellWidth + 2*marginSize, 
+    height: nRows*cellHeight + 2*marginSize + footerHeight,
+    rx: 4*marginSize, ry: 4*marginSize
   });
 
   if (factor > 1 && factor <= nCols) {
     if (factor == nCols) {
       // slightly wider tab in the rightmost position
       cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 3*marginWidth,
-        y: -marginWidth,
-        width: cellWidth + marginWidth,
-        height: cellHeight/2 + marginWidth,
-        rx: 3*marginWidth,
-        ry: 3*marginWidth
-      }).replace(/c[^c]*$/, '') + outerFrame.replace(/.*?v/, `v ${7*marginWidth} v`));
+        x: (factor-1)*cellWidth - 3*marginSize,
+        y: -marginSize,
+        width: cellWidth + marginSize,
+        height: cellHeight/2 + marginSize,
+        rx: 3*marginSize,
+        ry: 3*marginSize
+      }).replace(/c[^c]*$/, '') + outerFrame.replace(/.*?v/, `v ${7*marginSize} v`));
     }
     else {
       // standard tab is exactly as wide as the grid
       cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 3*marginWidth,
-        y: -marginWidth,
+        x: (factor-1)*cellWidth - 3*marginSize,
+        y: -marginSize,
         width: cellWidth,
-        height: cellHeight/2 + marginWidth,
-        rx: 3*marginWidth,
-        ry: 3*marginWidth
+        height: cellHeight/2 + marginSize,
+        rx: 3*marginSize,
+        ry: 3*marginSize
       }) + outerFrame.replace('M', ' L'));
     }
     textEls.push(html`<text
       x=${(factor-0.5)*cellWidth}
-      y=${-cellHeight/6 - marginWidth}
+      y=${-cellHeight/6 - marginSize}
       text-anchor="middle"
     >${factor}</text>`);
   }
@@ -250,7 +250,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
   }
 
   return html`<g id=${'factor-'+factor}
-    transform=${`translate(${marginWidth},${cellHeight/2 + 2*marginWidth})`}
+    transform=${`translate(${marginSize},${cellHeight/2 + 2*marginSize})`}
     style="mix-blend-mode: darken;"
   >
     <path id="cutout-path"
@@ -302,7 +302,7 @@ function App() {
   const [nRows, setNRows] = useState(12);
   const [nCols, setNCols] = useState(12);
   const [gridSize, setGridSize] = useState(80);
-  const [marginWidth, setMarginWidth] = useState(5);
+  const [marginSize, setMarginSize] = useState(5);
   const [nHolePunch, setNHolePunch] = useState(3);
   const [holePunchSize, setHolePunchSize] = useState(32);
   const [holePunchSpacing, setHolePunchSpacing] = useState(4.25*96);
@@ -320,7 +320,7 @@ function App() {
       ${" "}
       <${NumberInput} name="gridSize" label="Grid Size" unit="px" value=${gridSize} setValue=${setGridSize} />
       ${" "}
-      <${NumberInput} name="marginWidth" label="Margin Size" unit="px" value=${marginWidth} setValue=${setMarginWidth} />
+      <${NumberInput} name="marginSize" label="Margin Size" unit="px" value=${marginSize} setValue=${setMarginSize} />
       <br />
       <${NumberInput} name="nHolePunch" label="Hole Punch" value=${nHolePunch} setValue=${setNHolePunch} />
       ${" "}
@@ -332,7 +332,7 @@ function App() {
     </fieldset>
     <${Sieve}
       nRows=${nRows} nCols=${nCols}
-      marginWidth=${marginWidth} cellWidth=${gridSize} cellHeight=${gridSize}
+      marginSize=${marginSize} cellWidth=${gridSize} cellHeight=${gridSize}
       nHolePunch=${nHolePunch} holePunchSize=${holePunchSize} holePunchSpacing=${holePunchSpacing}
     />
   `;
