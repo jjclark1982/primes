@@ -1,37 +1,72 @@
 import { html, render, useState } from 'https://esm.sh/htm/preact/standalone'
 
-// Generate SVG path data for a rounded rectangle.
-// (Samee parameters as the <rect> element.)
-// Starts at the top right and ends at the top left, so it can be easily joined to tab paths.
+// Bezier curve helper functions
+// see https://math.stackexchange.com/questions/873224/calculate-control-points-of-cubic-bezier-curve-approximating-a-part-of-a-circle
+const α = (Math.sqrt(2)-1)*4/3; // about 0.552
+
+function cornerPathH(rx, ry) {
+  return `c ${α*rx},0 ${rx},${(1-α)*ry} ${rx},${ry}`;
+}
+
+function cornerPathV(rx, ry) {
+  return `c 0,${α*ry} ${(1-α)*rx},${ry} ${rx},${ry}`;
+}
+
+/**
+ * Generate bezier curve for a rounded rectangle.
+ * (Same parameters as the <rect> element.)
+ * Starts at the top right and ends at the top left, so it can be easily joined to tab paths.
+ * @returns pathData
+ */
 function roundRectPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x + width - rx},${y}`,
-    `c ${rx/2},0 ${rx},${ry/2} ${rx},${ry}`,
+    cornerPathH(rx, ry),
     `v ${height - 2*ry}`,
-    `c 0,${rx/2} ${-rx/2},${ry} ${-rx},${ry}`,
+    cornerPathV(-rx, ry),
     `h ${-(width - 2*rx)}`,
-    `c ${-rx/2},0 ${-rx},${-ry/2} ${-rx},${-ry}`,
+    cornerPathH(-rx, -ry),
     `v ${-(height - 2*ry)}`,
-    `c 0,${-ry/2} ${rx/2},${-ry} ${rx},${-ry}`,
+    cornerPathV(rx, -ry),
     `Z`,
   ].join(' ');
 }
 
-// Generate SVG path data for a rounded "tab" that can extend from the top of a rectangle.
+/**
+ * Generate bezier curve for a rounded "tab" that can extend from the top of a rectangle.
+ * @returns pathData
+ */
 function tabPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x},${y}`,
-    `c ${rx/2},0 ${rx},${-ry/2} ${rx},${-ry}`,
+    cornerPathH(rx, -ry),
     `v ${-(height - 2*ry)}`,
-    `c 0,${-ry/2} ${rx/2},${-ry} ${rx},${-ry}`,
+    cornerPathV(rx, -ry),
     `h ${width - 2*ry}`,
-    `c ${rx/2},0 ${rx},${ry/2} ${rx},${ry}`,
+    cornerPathH(rx, ry),
     `v ${height - 2*ry}`,
-    `c 0,${ry/2} ${rx/2},${ry} ${rx},${ry}`,
+    cornerPathV(rx, ry),
   ].join(' ');
 }
 
-// Download the first <SVG> element on the page.
+/**
+ * Generate bezier curve for a cicrle.
+ * @returns pathData
+ */
+function circlePath({cx, cy, rx, ry}) {
+  return [
+    `M ${cx},${cy-ry}`,
+    cornerPathH( rx,  ry),
+    cornerPathV(-rx,  ry),
+    cornerPathH(-rx, -ry),
+    cornerPathV( rx, -ry),
+    `Z`
+  ].join(' ');
+}
+
+/**
+ * Download the first <SVG> element on the page.
+ */
 function downloadSVG() {
   const svgEl = document.querySelector('svg');
   const filename = (svgEl.querySelector('title')?.textContent || 'download').split('\n')[0];
