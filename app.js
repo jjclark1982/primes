@@ -98,12 +98,13 @@ function Sieve(props) {
     nRows: 12,
     nCols: 12,
     marginWidth: 5.66, // 1.5 mm
-    cellWidth: 96,
-    cellHeight: 96,
+    cellWidth: 84, // 7/8 inch
+    cellHeight: 84,
     nHolePunch: 3,
     holePunchSize: 32, // 1/3 inch
     holePunchSpacing: 4.25*96, // US Letter 3-ring binder spacing is 4.25 inches
                                // 8 * 96/2.54 // Euro A4 binder spacing is 8 cm
+    makeBeads: true,
   };
   props = Object.assign({}, defaultProps, props);
   const {nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize} = props;
@@ -136,7 +137,7 @@ function Sieve(props) {
   `;
 }
 
-function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, factor, fill, showOutlines, showNumbers}) {
+function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, factor, fill, showOutlines, showNumbers, makeBeads}) {
   if (factor > Math.sqrt(nCols * nRows)) {
     // skip redundant layers
     return null;
@@ -147,6 +148,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
   const outlinePaths = [];
   // engraved numbers
   const textEls = [];
+  const beadEls = [];
 
   for (let row = 0; row < nRows; row++) {
     for (let col = 0; col < nCols; col++) {
@@ -176,6 +178,11 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
       else if (cellNum % factor != 0) {
         // non-multiples are fully cut out
         cutOutPaths.push(cellPath);
+        beadEls.push(html`<circle
+          cx=${col*cellWidth + 5*marginWidth}
+          cy=${row*cellHeight + 5*marginWidth}
+          r=${2*marginWidth}
+        />`);
       }
       else {
         // multiples have etched outlines, optionally
@@ -232,7 +239,7 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
         ry: 3*marginWidth
       }) + outerFrame.replace('M', ' L'));
     }
-    textEls.push(html`<text class="legend-text"
+    textEls.push(html`<text
       x=${(factor-0.5)*cellWidth}
       y=${-cellHeight/6 - marginWidth}
       text-anchor="middle"
@@ -242,22 +249,25 @@ function SieveLayer({nRows, nCols, marginWidth, cellWidth, cellHeight, nHolePunc
     cutOutPaths.push(outerFrame);
   }
 
-  return html`<g class="factor-layer" id=${'factor-'+factor}
+  return html`<g id=${'factor-'+factor}
     transform=${`translate(${marginWidth},${cellHeight/2 + 2*marginWidth})`}
     style="mix-blend-mode: darken;"
   >
-    <path class="cutout-path"
+    <path id="cutout-path"
       d=${cutOutPaths.join(' ')}
       fill-rule="evenodd"
       fill=${fill}
       opacity=${factor == 1 ? 1 : 1/3}
     />
-    <path class="etch-path"
+    <path id="etch-path"
       d=${outlinePaths.join(' ')}
       fill="rgba(255,255,255,0)"
       stroke=${showOutlines ? fill : ''}
     />
-    <g class="legend-text"
+    <g id="bead-threads" fill="transparent">
+      ${beadEls}
+    </g>
+    <g id="legend-text"
       fill="#444"
       style="font-size: ${cellHeight/3}px; font-weight: bold; font-family: sans-serif;"
     >
