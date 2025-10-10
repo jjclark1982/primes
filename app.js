@@ -203,7 +203,8 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
     const startX = (nCols/2)*cellWidth - holePunchSpacing * (nHolePunch-1)/2;
     for (let i = 0; i < nHolePunch; i++) {
       cutOutPaths.push(circlePath({
-        cx: startX + i*holePunchSpacing, cy: (nRows*cellHeight) + marginSize + holePunchSize/2,
+        cx: startX + i*holePunchSpacing,
+        cy: (nRows*cellHeight) + marginSize + holePunchSize/2,
         rx: holePunchSize/2, ry: holePunchSize/2
       }));
     }
@@ -280,10 +281,7 @@ function NumberInput({label, name, value, setValue, unit}) {
   let unitLabel = null;
   if (unit == 'px') {
     const unitTitle = `1 px = 1/96 inch\n${value} px = ${(value/96).toFixed(3)} inch\n${value} px = ${(value*2.54/96).toFixed(3)} cm`;
-    unitLabel = html`
-    ${" "}
-    <abbr title=${unitTitle}>(px)</abbr>
-    `;
+    unitLabel = html`${" "}<abbr title=${unitTitle}>(px)</abbr>`;
   }
   const inputEl = html`<input type="number" style="width:3.5em;" name=${name} value=${value} onChange=${function(event){setValue(event.target.valueAsNumber)}} />`;
   if (label) {
