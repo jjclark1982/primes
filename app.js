@@ -117,7 +117,7 @@ function Sieve(props) {
   }
 
   const totalWidth = nCols*cellWidth + 2*marginSize;
-  const totalHeight = (nRows+0.5)*cellHeight + 3*marginSize + (nHolePunch > 0)*(holePunchSize + 2*marginSize);
+  const totalHeight = (nRows+0.5)*cellHeight + 3*marginSize + (nHolePunch > 0)*(holePunchSize + 4*marginSize);
   const title = [
     `Sieve ${nCols}x${nRows} ${cellWidth}+${marginSize}px`,
     '',
@@ -198,13 +198,13 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
     }
   }
 
-  const footerHeight = (nHolePunch > 0) ? holePunchSize + 2*marginSize : 0;
+  const footerHeight = (nHolePunch > 0) ? holePunchSize + 4*marginSize : 0;
   if (nHolePunch > 0) {
     const startX = (nCols/2)*cellWidth - holePunchSpacing * (nHolePunch-1)/2;
     for (let i = 0; i < nHolePunch; i++) {
       cutOutPaths.push(circlePath({
         cx: startX + i*holePunchSpacing,
-        cy: (nRows*cellHeight) + marginSize + holePunchSize/2,
+        cy: (nRows*cellHeight) + 2*marginSize + holePunchSize/2,
         rx: holePunchSize/2, ry: holePunchSize/2
       }));
     }
