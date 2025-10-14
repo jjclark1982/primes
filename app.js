@@ -4,12 +4,24 @@ import { html, render, useState } from 'https://esm.sh/htm/preact/standalone'
 // see https://math.stackexchange.com/questions/873224/calculate-control-points-of-cubic-bezier-curve-approximating-a-part-of-a-circle
 const α = (Math.sqrt(2)-1)*4/3; // about 0.552
 
+// corner with horizontal first
 function cornerPathH(rx, ry) {
   return `c ${α*rx},0 ${rx},${(1-α)*ry} ${rx},${ry}`;
 }
 
+// corner with vertical first
 function cornerPathV(rx, ry) {
   return `c 0,${α*ry} ${(1-α)*rx},${ry} ${rx},${ry}`;
+}
+
+// corner clockwise
+function cornerPathCW(rx, ry) {
+  return `a ${rx},${ry} 90 0 1 ${rx},${ry}`;
+}
+
+// corner counterclockwise
+function cornerPathCCW(rx, ry) {
+  return `a ${rx},${ry} 90 0 0 ${rx},${ry}`;
 }
 
 /**
@@ -21,13 +33,13 @@ function cornerPathV(rx, ry) {
 function roundRectPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x + width - rx},${y}`,
-    cornerPathH(rx, ry),
+    cornerPathCW(rx, ry),
     `v ${height - 2*ry}`,
-    cornerPathV(-rx, ry),
+    cornerPathCW(-rx, ry),
     `h ${-(width - 2*rx)}`,
-    cornerPathH(-rx, -ry),
+    cornerPathCW(-rx, -ry),
     `v ${-(height - 2*ry)}`,
-    cornerPathV(rx, -ry),
+    cornerPathCW(rx, -ry),
     `Z`,
   ].join(' ');
 }
@@ -39,13 +51,13 @@ function roundRectPath({x, y, width, height, rx, ry}) {
 function tabPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x},${y}`,
-    cornerPathH(rx, -ry),
+    cornerPathCCW(rx, -ry),
     `v ${-(height - 2*ry)}`,
-    cornerPathV(rx, -ry),
+    cornerPathCW(rx, -ry),
     `h ${width - 2*ry}`,
-    cornerPathH(rx, ry),
+    cornerPathCW(rx, ry),
     `v ${height - 2*ry}`,
-    cornerPathV(rx, ry),
+    cornerPathCCW(rx, ry),
   ].join(' ');
 }
 
@@ -56,10 +68,10 @@ function tabPath({x, y, width, height, rx, ry}) {
 function circlePath({cx, cy, rx, ry}) {
   return [
     `M ${cx},${cy-ry}`,
-    cornerPathH( rx,  ry),
-    cornerPathV(-rx,  ry),
-    cornerPathH(-rx, -ry),
-    cornerPathV( rx, -ry),
+    cornerPathCW( rx,  ry),
+    cornerPathCW(-rx,  ry),
+    cornerPathCW(-rx, -ry),
+    cornerPathCW( rx, -ry),
     `Z`
   ].join(' ');
 }
@@ -227,7 +239,7 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
         height: cellHeight/2 + marginSize,
         rx: 3*marginSize,
         ry: 3*marginSize
-      }).replace(/c[^c]*$/, '') + outerFrame.replace(/.*?v/, `v ${7*marginSize} v`));
+      }).replace(/[ac][^ac]*$/i, '') + outerFrame.replace(/.*?v/, `v ${7*marginSize} v`));
     }
     else {
       // standard tab is exactly as wide as the grid
