@@ -199,13 +199,14 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
       else {
         // multiples have etched outlines, optionally
         outlinePaths.push(cellPath);
-      }
-      if (showNumbers) {
-        textEls.push(html`<text class="legend-text"
-          x=${(col+0.5)*cellWidth}
-          y=${(row+0.5)*cellHeight + cellHeight/9}
-          text-anchor="middle"
-        >${cellNum}</text>`);
+        // non-cutout cells have engraved numbers, optionally
+        if (showNumbers) {
+          textEls.push(html`<text class="legend-text"
+            x=${(col+0.5)*cellWidth}
+            y=${(row+0.5)*cellHeight + cellHeight/9}
+            text-anchor="middle"
+          >${cellNum}</text>`);
+        }
       }
     }
   }
