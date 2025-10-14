@@ -89,8 +89,8 @@ function downloadSVG() {
   a.click();
 };
 
-const layerSpecs = [
-  {factor: 1,  fill: 'white', showOutlines: true, showNumbers: true},  // layer 1 is white with engraved labels
+const layerDefs = [
+  {factor: 1,  fill: 'white', drawOutlines: true, showNumbers: true},  // layer 1 is white with engraved labels
   {factor: 2,  fill: 'rgba(0  , 255, 255, 0.75)'},  // layer 2 is translucent cyan with cutouts for non-multiples of 2
   {factor: 3,  fill: 'rgba(255, 0  , 255, 0.75)'},  // layer 3 is translucent magenta with cutouts for non-multiples of 3
   {factor: 5,  fill: 'rgb( 255, 255, 0        )'},  // layer 5 is translucent yellow with cutouts for non-multiples of 5
@@ -116,7 +116,6 @@ function Sieve(props) {
     holePunchSize: 32, // 1/3 inch
     holePunchSpacing: 4.25*96, // US Letter 3-ring binder spacing is 4.25 inches
                                // 8 * 96/2.54 // Euro A4 binder spacing is 8 cm
-    makeBeads: true,
   };
   props = Object.assign({}, defaultProps, props);
   const {nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize} = props;
@@ -144,12 +143,13 @@ function Sieve(props) {
       width=${totalWidth} height=${totalHeight}
     >
       <title>${title}</title>
-      ${layerSpecs.map((layerSpec)=>SieveLayer({makeBeads: true, ...props, ...layerSpec}))}
+      ${layerDefs.map((layerDef)=>SieveLayer({...props, layerDef}))}
     </svg>
   `;
 }
 
-function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, factor, fill, showOutlines, showNumbers, makeBeads}) {
+function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, layerDef}) {
+  const { factor, fill, drawOutlines, showNumbers } = layerDef;
   if (factor > Math.sqrt(nCols * nRows)) {
     // skip redundant layers
     return null;
@@ -275,7 +275,7 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
     <path id="etch-path"
       d=${outlinePaths.join(' ')}
       fill="rgba(255,255,255,0)"
-      stroke=${showOutlines ? fill : ''}
+      stroke=${drawOutlines ? fill : ''}
     />
     <g id="bead-threads" fill="transparent">
       ${beadEls}
