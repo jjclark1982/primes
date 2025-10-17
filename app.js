@@ -1,4 +1,4 @@
-import { html, render, useState } from 'https://esm.sh/htm/preact/standalone'
+import { html, render, useState, useEffect } from 'https://esm.sh/htm/preact/standalone'
 
 // Bezier curve helper functions
 // see https://math.stackexchange.com/questions/873224/calculate-control-points-of-cubic-bezier-curve-approximating-a-part-of-a-circle
@@ -106,19 +106,10 @@ const layerDefs = [
 ];
 
 function Sieve(props) {
-  const defaultProps = {
-    nRows: 12,
-    nCols: 12,
-    marginSize: 5.66, // 1.5 mm
-    cellWidth: 84, // 7/8 inch
-    cellHeight: 84,
-    nHolePunch: 3,
-    holePunchSize: 32, // 1/3 inch
-    holePunchSpacing: 4.25*96, // US Letter 3-ring binder spacing is 4.25 inches
-                               // 8 * 96/2.54 // Euro A4 binder spacing is 8 cm
-  };
-  props = Object.assign({}, defaultProps, props);
-  const {nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize} = props;
+  props = Object.assign({}, defaultParams, props);
+  const {nRows, nCols, marginSize, gridSize, nHolePunch, holePunchSize} = props;
+  const cellWidth = gridSize;
+  const cellHeight = gridSize;
 
   const [confirmGeneration, setConfirmGeneration] = useState(false);
   if ((nRows * nCols > 1024) && (confirmGeneration == false)) {
@@ -149,7 +140,7 @@ function Sieve(props) {
       width=${totalWidth} height=${totalHeight}
     >
       <title>${title}</title>
-      ${layerDefs.map((layerDef)=>SieveLayer({...props, layerDef}))}
+      ${layerDefs.map((layerDef)=>SieveLayer({...props, cellWidth, cellHeight, layerDef}))}
     </svg>
   `;
 }
@@ -315,14 +306,42 @@ function NumberInput({label, name, value, setValue, unit}) {
   }
 }
 
-function App() {
-  const [nRows, setNRows] = useState(12);
-  const [nCols, setNCols] = useState(12);
-  const [gridSize, setGridSize] = useState(86);
-  const [marginSize, setMarginSize] = useState(5.5);
-  const [nHolePunch, setNHolePunch] = useState(3);
-  const [holePunchSize, setHolePunchSize] = useState(32);
-  const [holePunchSpacing, setHolePunchSpacing] = useState(4.25*96);
+function encodeQueryString(obj) {
+  const kvPairs = [];
+  for (const [key, value] of Object.entries(obj)) {
+    kvPairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+  }
+  return '?'+kvPairs.join('&');
+}
+
+function decodeQueryString(qs) {
+  const obj = {};
+  for (const kvString of qs.substr(1).split('&')) {
+    const kvArray = kvString.split('=');
+    const key = decodeURIComponent(kvArray[0]);
+    const value = decodeURIComponent(kvArray[1]);
+    const valueNum = parseFloat(value);
+    obj[key] = valueNum == value ? valueNum : value;
+  }
+  return obj;
+}
+
+function App(initialValues) {
+  const [nCols, setNCols] = useState(initialValues.nCols);
+  const [nRows, setNRows] = useState(initialValues.nRows);
+  const [gridSize, setGridSize] = useState(initialValues.gridSize);
+  const [marginSize, setMarginSize] = useState(initialValues.marginSize);
+  const [nHolePunch, setNHolePunch] = useState(initialValues.nHolePunch);
+  const [holePunchSize, setHolePunchSize] = useState(initialValues.holePunchSize);
+  const [holePunchSpacing, setHolePunchSpacing] = useState(initialValues.holePunchSpacing);
+  const sieveParams = {nCols, nRows, gridSize, marginSize, nHolePunch, holePunchSize, holePunchSpacing};
+  const permalink = encodeQueryString(sieveParams);
+  useEffect(()=>{
+    history.replaceState(sieveParams, null, permalink);
+  }, [permalink]);
+  const handleReset = ()=>{
+    document.location.replace('.');
+  };
   return html`
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
@@ -345,14 +364,29 @@ function App() {
       ${" "}
       <${NumberInput} name="holePunchSpacing" label="Spacing" unit="px" value=${holePunchSpacing} setValue=${setHolePunchSpacing} />
       ${" "}
+      <a href=${permalink} title="Link to the current configuration">🔗</a>
+      ${" "}
+      <button onClick=${handleReset}>Reset</button>
+      ${" "}
       <button onClick=${downloadSVG}>Download SVG</button>
     </fieldset>
-    <${Sieve}
-      nRows=${nRows} nCols=${nCols}
-      marginSize=${marginSize} cellWidth=${gridSize} cellHeight=${gridSize}
-      nHolePunch=${nHolePunch} holePunchSize=${holePunchSize} holePunchSpacing=${holePunchSpacing}
-    />
+    <${Sieve} ...${sieveParams} />
   `;
 }
 
-render(html`<${App} />`, document.body);
+const defaultParams = {
+  nCols: 12,
+  nRows: 12,
+  gridSize: 86, // fit in 10.9-inch cuttable area
+  // gridSize: 84, // 84px = 7/8 inch
+  marginSize: 5.5,
+  // marginSize: 5.66, // 5.66px = 1.5mm, good for 3mm thick material
+  nHolePunch: 3,
+  holePunchSize: 32, // 1/3 inch
+  holePunchSpacing: 4.25*96 // US Letter 3-ring binder spacing is 4.25 inches
+  // holePunchSpacing: 8 * 96/2.54, // Euro A4 binder spacing is 8 cm
+};
+
+const initialValues = Object.assign({}, defaultParams, decodeQueryString(document.location.search));
+
+render(html`<${App} ...${initialValues}/>`, document.body);
