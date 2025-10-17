@@ -54,7 +54,7 @@ function tabPath({x, y, width, height, rx, ry}) {
     cornerPathCCW(rx, -ry),
     `v ${-(height - 2*ry)}`,
     cornerPathCW(rx, -ry),
-    `h ${width - 2*ry}`,
+    `h ${width - 2*rx}`,
     cornerPathCW(rx, ry),
     `v ${height - 2*ry}`,
     cornerPathCCW(rx, ry),
