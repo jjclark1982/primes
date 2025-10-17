@@ -132,9 +132,15 @@ function Sieve(props) {
   const title = [
     `Sieve ${nCols}x${nRows} ${cellWidth}+${marginSize}px`,
     '',
-    `Total Size\n${totalWidth} × ${totalHeight} px`,
+    `Total Size`,
+    `${totalWidth} × ${totalHeight} px`,
     `${(totalWidth/96).toFixed(2)} × ${(totalHeight/96).toFixed(2)} in`,
     `${(totalWidth/96*2.54).toFixed(2)} × ${(totalHeight/96*2.54).toFixed(2)} cm`,
+    '',
+    `Cell Cutout Width`,
+    `${cellWidth - 2*marginSize} px`,
+    `${((cellWidth - 2*marginSize)/96).toFixed(2)} in`,
+    `${((cellWidth - 2*marginSize)/96*2.54).toFixed(2)} cm`,
   ].join('\n');
 
   return html`
@@ -312,8 +318,8 @@ function NumberInput({label, name, value, setValue, unit}) {
 function App() {
   const [nRows, setNRows] = useState(12);
   const [nCols, setNCols] = useState(12);
-  const [gridSize, setGridSize] = useState(80);
-  const [marginSize, setMarginSize] = useState(5);
+  const [gridSize, setGridSize] = useState(86);
+  const [marginSize, setMarginSize] = useState(5.5);
   const [nHolePunch, setNHolePunch] = useState(3);
   const [holePunchSize, setHolePunchSize] = useState(32);
   const [holePunchSpacing, setHolePunchSpacing] = useState(4.25*96);
