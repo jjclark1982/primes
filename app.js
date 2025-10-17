@@ -168,28 +168,31 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
   const textEls = [];
   const beadEls = [];
 
+  const xMargin = marginSize / cellHeight;
+  const yMargin = marginSize / cellWidth;
+
   for (let row = 0; row < nRows; row++) {
     for (let col = 0; col < nCols; col++) {
       const cellNum = (row * nCols) + col + 1;
 
       const cellPath = roundRectPath({
-        x: col*cellWidth + marginSize,
-        y: row*cellHeight + marginSize,
-        width: cellWidth - 2*marginSize,
-        height: cellHeight - 2*marginSize,
-        rx: 3*marginSize,
-        ry: 3*marginSize
+        x: col + xMargin,
+        y: row + yMargin,
+        width: 1.0 - 2*xMargin,
+        height: 1.0 - 2*yMargin,
+        rx: 3*xMargin,
+        ry: 3*yMargin
       });
 
       if (cellNum == factor && factor != 1) {
         // base factor has a smaller cutout
         const insetCellPath = roundRectPath({
-          x: col*cellWidth + 3*marginSize,
-          y: row*cellHeight + 3*marginSize,
-          width: cellWidth - 6*marginSize,
-          height: cellHeight - 6*marginSize,
-          rx: 2*marginSize,
-          ry: 2*marginSize
+          x: col + 3*xMargin,
+          y: row + 3*yMargin,
+          width: 1.0 - 6*xMargin,
+          height: 1.0 - 6*yMargin,
+          rx: 2*xMargin,
+          ry: 2*yMargin
         });
         cutOutPaths.push(insetCellPath);
       }
@@ -197,9 +200,9 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
         // non-multiples are fully cut out
         cutOutPaths.push(cellPath);
         beadEls.push(html`<circle
-          cx=${col*cellWidth + 5*marginSize}
-          cy=${row*cellHeight + 5*marginSize}
-          r=${2*marginSize}
+          cx=${col + 5*xMargin}
+          cy=${row + 5*yMargin}
+          r=${2*yMargin}
         />`);
       }
       else {
@@ -208,8 +211,8 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
         // non-cutout cells have engraved numbers, optionally
         if (showNumbers) {
           textEls.push(html`<text class="legend-text"
-            x=${(col+0.5)*cellWidth}
-            y=${(row+0.5)*cellHeight + cellHeight/9}
+            x=${(col+0.5)}
+            y=${(row+0.5) + 1/9}
             text-anchor="middle"
           >${cellNum}</text>`);
         }
@@ -217,51 +220,51 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
     }
   }
 
-  const footerHeight = (nHolePunch > 0) ? holePunchSize + 4*marginSize : 0;
+  const footerHeight = (nHolePunch > 0) ? holePunchSize + 4*yMargin : 0;
   if (nHolePunch > 0) {
-    const startX = (nCols/2)*cellWidth - holePunchSpacing * (nHolePunch-1)/2;
+    const startX = (nCols/2)*1.0 - holePunchSpacing/cellWidth * (nHolePunch-1)/2;
     for (let i = 0; i < nHolePunch; i++) {
       cutOutPaths.push(circlePath({
-        cx: startX + i*holePunchSpacing,
-        cy: (nRows*cellHeight) + 2*marginSize + holePunchSize/2,
+        cx: startX + i*holePunchSpacing/cellWidth,
+        cy: (nRows*1.0) + 2*yMargin + holePunchSize/2,
         rx: holePunchSize/2, ry: holePunchSize/2
       }));
     }
   }
 
   const outerFrame = roundRectPath({
-    x: -marginSize, y: -marginSize,
-    width: nCols*cellWidth + 2*marginSize, 
-    height: nRows*cellHeight + 2*marginSize + footerHeight,
-    rx: 4*marginSize, ry: 4*marginSize
+    x: -xMargin, y: -yMargin,
+    width: nCols*1.0 + 2*xMargin, 
+    height: nRows*1.0 + 2*yMargin + footerHeight,
+    rx: 4*xMargin, ry: 4*yMargin
   });
 
   if (factor > 1 && factor <= nCols) {
     if (factor == nCols) {
       // slightly wider tab in the rightmost position
       cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 3*marginSize,
-        y: -marginSize,
-        width: cellWidth + marginSize,
-        height: cellHeight/2 + marginSize,
-        rx: 3*marginSize,
-        ry: 3*marginSize
-      }).replace(/[ac][^ac]*$/i, '') + outerFrame.replace(/.*?v/, `v ${7*marginSize} v`));
+        x: (factor-1)*1.0 - 3*xMargin,
+        y: -yMargin,
+        width: 1.0 + xMargin,
+        height: 1/2 + yMargin,
+        rx: 3*xMargin,
+        ry: 3*yMargin
+      }).replace(/[ac][^ac]*$/i, '') + outerFrame.replace(/.*?v/, `v ${7*yMargin} v`));
     }
     else {
       // standard tab is exactly as wide as the grid
       cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 3*marginSize,
-        y: -marginSize,
-        width: cellWidth,
-        height: cellHeight/2 + marginSize,
-        rx: 3*marginSize,
-        ry: 3*marginSize
+        x: (factor-1)*1.0 - 3*xMargin,
+        y: -yMargin,
+        width: 1.0,
+        height: 1/2 + yMargin,
+        rx: 3*xMargin,
+        ry: 3*yMargin
       }) + outerFrame.replace('M', ' L'));
     }
     textEls.push(html`<text
-      x=${(factor-0.5)*cellWidth}
-      y=${-cellHeight/6 - marginSize}
+      x=${(factor-0.5)*1.0}
+      y=${-1.0/6 - yMargin}
       text-anchor="middle"
     >${factor}</text>`);
   }
@@ -270,7 +273,7 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
   }
 
   return html`<g id=${'factor-'+factor}
-    transform=${`translate(${marginSize},${cellHeight/2 + 2*marginSize})`}
+    transform=${`scale(${cellWidth},${cellHeight}) translate(${xMargin},${1/2 + 2*yMargin})`}
     style="mix-blend-mode: darken;"
   >
     <path id="cutout-path"
@@ -289,7 +292,7 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
     </g>
     <g id="legend-text"
       fill="#444"
-      style="font-size: ${cellHeight/3}px; font-weight: bold; font-family: sans-serif;"
+      style="font-size: ${1/3}px; font-weight: bold; font-family: sans-serif;"
     >
       ${textEls}
     </g>
