@@ -107,9 +107,11 @@ const layerDefs = [
 
 function Sieve(props) {
   props = Object.assign({}, defaultParams, props);
-  const {nRows, nCols, marginSize, gridSize, nHolePunch, holePunchSize} = props;
+  const {nRows, nCols, marginSize, gridSize, sharpness, nHolePunch, holePunchSize} = props;
   const cellWidth = gridSize;
   const cellHeight = gridSize;
+  const rx = cellWidth/(sharpness+2);
+  const ry = cellHeight/(sharpness+2);
 
   const [confirmGeneration, setConfirmGeneration] = useState(false);
   if ((nRows * nCols > 1024) && (confirmGeneration == false)) {
@@ -140,12 +142,12 @@ function Sieve(props) {
       width=${totalWidth} height=${totalHeight}
     >
       <title>${title}</title>
-      ${layerDefs.map((layerDef)=>SieveLayer({...props, cellWidth, cellHeight, layerDef}))}
+      ${layerDefs.map((layerDef)=>SieveLayer({...props, cellWidth, cellHeight, rx, ry, layerDef}))}
     </svg>
   `;
 }
 
-function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch, holePunchSize, holePunchSpacing, layerDef}) {
+function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nHolePunch, holePunchSize, holePunchSpacing, layerDef}) {
   const { factor, fill, drawOutlines, showNumbers } = layerDef;
   if (factor > Math.sqrt(nCols * nRows)) {
     // skip redundant layers
@@ -168,8 +170,8 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
         y: row*cellHeight + marginSize,
         width: cellWidth - 2*marginSize,
         height: cellHeight - 2*marginSize,
-        rx: 3*marginSize,
-        ry: 3*marginSize
+        rx: rx - 1*marginSize,
+        ry: ry - 1*marginSize
       });
 
       if (cellNum == factor && factor != 1) {
@@ -179,14 +181,15 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
           y: row*cellHeight + 3*marginSize,
           width: cellWidth - 6*marginSize,
           height: cellHeight - 6*marginSize,
-          rx: 2*marginSize,
-          ry: 2*marginSize
+          rx: Math.max(0, rx - 3*marginSize),
+          ry: Math.max(0, ry - 3*marginSize),
         });
         cutOutPaths.push(insetCellPath);
       }
       else if (cellNum % factor != 0) {
         // non-multiples are fully cut out
         cutOutPaths.push(cellPath);
+        // fully cut out cells can be perforated to make beads (optionally)
         beadEls.push(html`<circle
           cx=${col*cellWidth + 5*marginSize}
           cy=${row*cellHeight + 5*marginSize}
@@ -194,9 +197,9 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
         />`);
       }
       else {
-        // multiples have etched outlines, optionally
+        // multiples have etched outlines (optionally)
         outlinePaths.push(cellPath);
-        // non-cutout cells have engraved numbers, optionally
+        // non-cutout cells have engraved numbers (optionally)
         if (showNumbers) {
           textEls.push(html`<text class="legend-text"
             x=${(col+0.5)*cellWidth}
@@ -224,31 +227,27 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, nHolePunch
     x: -marginSize, y: -marginSize,
     width: nCols*cellWidth + 2*marginSize, 
     height: nRows*cellHeight + 2*marginSize + footerHeight,
-    rx: 4*marginSize, ry: 4*marginSize
+    rx: rx + 1*marginSize,
+    ry: ry + 1*marginSize
   });
 
   if (factor > 1 && factor <= nCols) {
+    const tabPathParams = {
+      x: (factor-1)*cellWidth - cellWidth/4,
+      y: -marginSize,
+      width: cellWidth,
+      height: cellHeight/2 + marginSize,
+      rx: cellWidth/4,
+      ry: cellHeight/4
+    };
     if (factor == nCols) {
       // slightly wider tab in the rightmost position
-      cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 3*marginSize,
-        y: -marginSize,
-        width: cellWidth + marginSize,
-        height: cellHeight/2 + marginSize,
-        rx: 3*marginSize,
-        ry: 3*marginSize
-      }).replace(/[ac][^ac]*$/i, '') + outerFrame.replace(/.*?v/, `v ${7*marginSize} v`));
+      tabPathParams.width += marginSize;
+      cutOutPaths.push(tabPath(tabPathParams).replace(/[ac][^ac]*$/i, '') + outerFrame.replace(/.*?v/, `v ${tabPathParams.ry + 1*marginSize + ry} v`));
     }
     else {
       // standard tab is exactly as wide as the grid
-      cutOutPaths.push(tabPath({
-        x: (factor-1)*cellWidth - 3*marginSize,
-        y: -marginSize,
-        width: cellWidth,
-        height: cellHeight/2 + marginSize,
-        rx: 3*marginSize,
-        ry: 3*marginSize
-      }) + outerFrame.replace('M', ' L'));
+      cutOutPaths.push(tabPath(tabPathParams) + outerFrame.replace('M', ' L'));
     }
     textEls.push(html`<text
       x=${(factor-0.5)*cellWidth}
@@ -331,10 +330,11 @@ function App(initialValues) {
   const [nRows, setNRows] = useState(initialValues.nRows);
   const [gridSize, setGridSize] = useState(initialValues.gridSize);
   const [marginSize, setMarginSize] = useState(initialValues.marginSize);
+  const [sharpness, setSharpness] = useState(initialValues.sharpness);
   const [nHolePunch, setNHolePunch] = useState(initialValues.nHolePunch);
   const [holePunchSize, setHolePunchSize] = useState(initialValues.holePunchSize);
   const [holePunchSpacing, setHolePunchSpacing] = useState(initialValues.holePunchSpacing);
-  const sieveParams = {nCols, nRows, gridSize, marginSize, nHolePunch, holePunchSize, holePunchSpacing};
+  const sieveParams = {nCols, nRows, gridSize, marginSize, sharpness, nHolePunch, holePunchSize, holePunchSpacing};
   const permalink = encodeQueryString(sieveParams);
   useEffect(()=>{
     history.replaceState(sieveParams, null, permalink);
@@ -357,6 +357,8 @@ function App(initialValues) {
       <${NumberInput} name="gridSize" label="Grid Size" unit="px" value=${gridSize} setValue=${setGridSize} />
       ${" "}
       <${NumberInput} name="marginSize" label="Margin Size" unit="px" value=${marginSize} setValue=${setMarginSize} />
+      ${" "}
+      <${NumberInput} name="sharpness" label="Corner Sharpness" value=${sharpness} setValue=${setSharpness} />
       <br />
       <${NumberInput} name="nHolePunch" label="Hole Punch" value=${nHolePunch} setValue=${setNHolePunch} />
       ${" "}
@@ -381,6 +383,7 @@ const defaultParams = {
   // gridSize: 84, // 84px = 7/8 inch
   marginSize: 5.5,
   // marginSize: 5.66, // 5.66px = 1.5mm, good for 3mm thick material
+  sharpness: 1,
   nHolePunch: 3,
   holePunchSize: 32, // 1/3 inch
   holePunchSpacing: 4.25*96 // US Letter 3-ring binder spacing is 4.25 inches
