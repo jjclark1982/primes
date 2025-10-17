@@ -336,15 +336,19 @@ function App(initialValues) {
   const [holePunchSpacing, setHolePunchSpacing] = useState(initialValues.holePunchSpacing);
   const sieveParams = {nCols, nRows, gridSize, marginSize, sharpness, nHolePunch, holePunchSize, holePunchSpacing};
   const permalink = encodeQueryString(sieveParams);
-  useEffect(()=>{
-    history.replaceState(sieveParams, null, permalink);
-  }, [permalink]);
+  if (document.location.search) {
+    useEffect(()=>{
+      history.replaceState(sieveParams, null, permalink);
+    }, [permalink]);
+  }
   const handleReset = ()=>{
     document.location.replace('.');
   };
   return html`
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
+      ${" "}
+      <a href=${permalink} title="Link to the current configuration">🔗</a>
     </h1>
     <div style="position: fixed; bottom: 1em; right: 1em;">
       <a href="https://github.com/jjclark1982/primes" title="Feedback">π</a>
@@ -365,8 +369,6 @@ function App(initialValues) {
       <${NumberInput} name="holePunchSize" label="Size" unit="px" value=${holePunchSize} setValue=${setHolePunchSize} />
       ${" "}
       <${NumberInput} name="holePunchSpacing" label="Spacing" unit="px" value=${holePunchSpacing} setValue=${setHolePunchSpacing} />
-      ${" "}
-      <a href=${permalink} title="Link to the current configuration">🔗</a>
       ${" "}
       <button onClick=${handleReset}>Reset</button>
       ${" "}
