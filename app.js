@@ -33,13 +33,13 @@ function cornerPathCCW(rx, ry) {
 function roundRectPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x + width - rx},${y}`,
-    cornerPathCW(rx, ry),
+    cornerPathH(rx, ry),
     `v ${height - 2*ry}`,
-    cornerPathCW(-rx, ry),
+    cornerPathV(-rx, ry),
     `h ${-(width - 2*rx)}`,
-    cornerPathCW(-rx, -ry),
+    cornerPathH(-rx, -ry),
     `v ${-(height - 2*ry)}`,
-    cornerPathCW(rx, -ry),
+    cornerPathV(rx, -ry),
     `Z`,
   ].join(' ');
 }
@@ -51,13 +51,13 @@ function roundRectPath({x, y, width, height, rx, ry}) {
 function tabPath({x, y, width, height, rx, ry}) {
   return [
     `M ${x},${y}`,
-    cornerPathCCW(rx, -ry),
+    cornerPathH(rx, -ry),
     `v ${-(height - 2*ry)}`,
-    cornerPathCW(rx, -ry),
+    cornerPathV(rx, -ry),
     `h ${width - 2*rx}`,
-    cornerPathCW(rx, ry),
+    cornerPathH(rx, ry),
     `v ${height - 2*ry}`,
-    cornerPathCCW(rx, ry),
+    cornerPathV(rx, ry),
   ].join(' ');
 }
 
@@ -68,10 +68,10 @@ function tabPath({x, y, width, height, rx, ry}) {
 function circlePath({cx, cy, rx, ry}) {
   return [
     `M ${cx},${cy-ry}`,
-    cornerPathCW( rx,  ry),
-    cornerPathCW(-rx,  ry),
-    cornerPathCW(-rx, -ry),
-    cornerPathCW( rx, -ry),
+    cornerPathH( rx,  ry),
+    cornerPathV(-rx,  ry),
+    cornerPathH(-rx, -ry),
+    cornerPathV( rx, -ry),
     `Z`
   ].join(' ');
 }
