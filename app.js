@@ -347,8 +347,6 @@ function App(initialValues) {
   return html`
     <h1>
       <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes">Sieve of Eratosthenes</a> Cutout Pattern Generator
-      ${" "}
-      <a href=${permalink} title="Link to the current configuration">🔗</a>
     </h1>
     <div style="position: fixed; bottom: 1em; right: 1em;">
       <a href="https://github.com/jjclark1982/primes" title="Feedback">π</a>
@@ -369,8 +367,10 @@ function App(initialValues) {
       <${NumberInput} name="holePunchSize" label="Size" unit="px" value=${holePunchSize} setValue=${setHolePunchSize} />
       ${" "}
       <${NumberInput} name="holePunchSpacing" label="Spacing" unit="px" value=${holePunchSpacing} setValue=${setHolePunchSpacing} />
-      ${" "}
+      <br />
       <button onClick=${handleReset}>Reset</button>
+      ${" "}
+      <a href=${permalink} title="Link to the current configuration">Permalink</a>
       ${" "}
       <button onClick=${downloadSVG}>Download SVG</button>
     </fieldset>
