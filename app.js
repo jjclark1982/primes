@@ -110,8 +110,8 @@ function Sieve(props) {
   const {nRows, nCols, marginSize, gridSize, sharpness, nHolePunch, holePunchSize} = props;
   const cellWidth = gridSize;
   const cellHeight = gridSize;
-  const rx = cellWidth/(sharpness+2);
-  const ry = cellHeight/(sharpness+2);
+  const rx = cellWidth/((sharpness/4)+2);
+  const ry = cellHeight/((sharpness/4)+2);
 
   const [confirmGeneration, setConfirmGeneration] = useState(false);
   if ((nRows * nCols > 1024) && (confirmGeneration == false)) {
@@ -385,7 +385,7 @@ const defaultParams = {
   // gridSize: 84, // 84px = 7/8 inch
   marginSize: 5.5,
   // marginSize: 5.66, // 5.66px = 1.5mm, good for 3mm thick material
-  sharpness: 1,
+  sharpness: 4,
   nHolePunch: 3,
   holePunchSize: 32, // 1/3 inch
   holePunchSpacing: 4.25*96 // US Letter 3-ring binder spacing is 4.25 inches
