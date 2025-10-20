@@ -52,8 +52,8 @@ function tabPath({x, y, width, height, rx, ry, curvedStart=true, curvedEnd=true}
   const rx1 = curvedStart ? rx : 0;
   const rx4 = curvedEnd ? rx : 0;
   return [
-    `M ${x - rx1},${y}`,
-    cornerPathH(rx, -ry),
+    `L ${x - rx1},${y}`,
+    cornerPathH(rx1, -ry),
     `v ${-(height - 2*ry)}`,
     cornerPathV(rx, -ry),
     `h ${width - 2*rx}`,
@@ -225,44 +225,87 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nH
     }
   }
 
-  const outerFrame = roundRectPath({
+  let outerFrameRect = roundRectPath({
     x: -marginSize, y: -marginSize,
     width: nCols*cellWidth + 2*marginSize, 
     height: nRows*cellHeight + 2*marginSize + footerHeight,
     rx: rx + 1*marginSize,
     ry: ry + 1*marginSize
   });
+  const outerFrameParts = [];
 
-  if (factor > 1 && factor <= nCols) {
-    const tabPathParams = {
-      x: (factor-1)*cellWidth,
+  const tabLefts = [0,  (factor - 1) % nCols,              nCols - 1];
+  const tabRights =   [1,              (factor - 1) % nCols + 1,          nCols];
+  for (let i = 1; i < tabLefts.length; i++) {
+    if (tabLefts[i] == tabRights[i-1]) {
+      tabLefts.splice(i, 1);
+      tabRights.splice(i-1, 1);
+      i--;
+    }
+    if (tabLefts[i] == tabLefts[i-1]) {
+      tabLefts.splice(i, 1);
+      tabRights.splice(i, 1);
+      i--;
+    }
+  }
+
+  for (let i = 0; i < tabLefts.length; i++) {
+    if (i == 0) {
+      outerFrameParts.push(`M ${-marginSize},${-marginSize}`);
+    }
+    const tabParam = {
+      x: (tabLefts[i])*cellWidth,
       y: -marginSize,
-      width: cellWidth,
+      width: (tabRights[i] - tabLefts[i])*cellWidth,
       height: cellHeight/2 + marginSize,
       rx: cellWidth/4,
-      ry: cellHeight/4
+      ry: cellHeight/4,
     };
-    if (factor == nCols) {
-      // slightly wider tab in the rightmost position
-      tabPathParams.width += marginSize;
-      tabPathParams.curvedEnd = false;
-      cutOutPaths.push(tabPath(tabPathParams) +
-        outerFrame.replace(/.*?v/, `v ${marginSize + ry} v`)
-      );
+    if (tabLefts[i] == 0) {
+      tabParam.x -= marginSize;
+      tabParam.width += marginSize;
+      tabParam.curvedStart = false;
+      outerFrameRect = outerFrameRect.replace(/c[^c]*Z/i, 'Z');
     }
-    else {
-      // standard tab is exactly as wide as the grid
-      cutOutPaths.push(tabPath(tabPathParams) + outerFrame.replace('M', ' L'));
+    if (tabRights[i] == 1) {
+      tabParam.width += marginSize;
     }
+    if (tabLefts[i] == nCols-1) {
+      tabParam.x -= marginSize;
+      tabParam.width += marginSize;
+    }
+    if (tabRights[i] == nCols) {
+      tabParam.width += marginSize;
+      tabParam.curvedEnd = false;
+      outerFrameRect = outerFrameRect.replace(/.*?v/, `v ${marginSize + ry} v`);
+    }
+    outerFrameParts.push(tabPath(tabParam));
+  }
+  // hole punches at top corners
+  for (const i of [1, nCols]) {
+    cutOutPaths.push(circlePath({
+      cx: (i-0.5)*cellWidth,
+      cy: -marginSize - cellHeight/4,
+      rx: holePunchSize/2,
+      ry: holePunchSize/2
+    }));
+  }
+
+  const outerFrame = [
+    ...outerFrameParts,
+    outerFrameRect,
+  ].join(' ');
+
+  
+  if (factor > 1 && factor <= nCols) {
+    // numeric tabs have engraved numbers
     textEls.push(html`<text
       x=${(factor-0.5)*cellWidth}
       y=${-cellHeight/6 - marginSize}
       text-anchor="middle"
     >${factor}</text>`);
   }
-  else {
-    cutOutPaths.push(outerFrame);
-  }
+  cutOutPaths.push(outerFrame);
 
   return html`<g id=${'factor-'+factor}
     transform=${`translate(${marginSize},${cellHeight/2 + 2*marginSize})`}
@@ -391,7 +434,7 @@ const defaultParams = {
   marginSize: 5.5,
   // marginSize: 5.66, // 5.66px = 1.5mm, good for 3mm thick material
   sharpness: 4,
-  nHolePunch: 3,
+  nHolePunch: 0,
   holePunchSize: 32, // 1/3 inch
   holePunchSpacing: 4.25*96 // US Letter 3-ring binder spacing is 4.25 inches
   // holePunchSpacing: 8 * 96/2.54, // Euro A4 binder spacing is 8 cm
