@@ -48,16 +48,18 @@ function roundRectPath({x, y, width, height, rx, ry}) {
  * Generate bezier curve for a rounded "tab" that can extend from the top of a rectangle.
  * @returns pathData
  */
-function tabPath({x, y, width, height, rx, ry}) {
+function tabPath({x, y, width, height, rx, ry, curvedStart=true, curvedEnd=true}) {
+  const rx1 = curvedStart ? rx : 0;
+  const rx4 = curvedEnd ? rx : 0;
   return [
-    `M ${x},${y}`,
+    `M ${x - rx1},${y}`,
     cornerPathH(rx, -ry),
     `v ${-(height - 2*ry)}`,
     cornerPathV(rx, -ry),
     `h ${width - 2*rx}`,
     cornerPathH(rx, ry),
     `v ${height - 2*ry}`,
-    cornerPathV(rx, ry),
+    cornerPathV(rx4, ry),
   ].join(' ');
 }
 
@@ -233,7 +235,7 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nH
 
   if (factor > 1 && factor <= nCols) {
     const tabPathParams = {
-      x: (factor-1)*cellWidth - cellWidth/4,
+      x: (factor-1)*cellWidth,
       y: -marginSize,
       width: cellWidth,
       height: cellHeight/2 + marginSize,
@@ -243,7 +245,10 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nH
     if (factor == nCols) {
       // slightly wider tab in the rightmost position
       tabPathParams.width += marginSize;
-      cutOutPaths.push(tabPath(tabPathParams).replace(/[ac][^ac]*$/i, '') + outerFrame.replace(/.*?v/, `v ${tabPathParams.ry + 1*marginSize + ry} v`));
+      tabPathParams.curvedEnd = false;
+      cutOutPaths.push(tabPath(tabPathParams) +
+        outerFrame.replace(/.*?v/, `v ${marginSize + ry} v`)
+      );
     }
     else {
       // standard tab is exactly as wide as the grid
