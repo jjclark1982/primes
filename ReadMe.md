@@ -17,3 +17,6 @@ Similar visualizations that this could be adapted to:
 - https://en.wikipedia.org/wiki/Gaussian_integer
 - https://mathworld.wolfram.com/GaussianPrime.html
 - https://mathworld.wolfram.com/EisensteinPrime.html
+- https://en.wikipedia.org/wiki/Coprime_integers
+- https://www.youtube.com/watch?v=4EXVtn08Rxg
+
