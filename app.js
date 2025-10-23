@@ -285,9 +285,9 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nH
   for (const i of [1, nCols]) {
     cutOutPaths.push(circlePath({
       cx: (i-0.5)*cellWidth,
-      cy: -marginSize - cellHeight/4,
-      rx: holePunchSize/2,
-      ry: holePunchSize/2
+      cy: -(cellHeight/2 + marginSize)/2,
+      rx: (cellHeight/2 - marginSize)/2,
+      ry: (cellHeight/2 - marginSize)/2,
     }));
   }
 
