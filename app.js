@@ -358,17 +358,17 @@ function encodeQueryString(obj) {
   for (const [key, value] of Object.entries(obj)) {
     kvPairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
   }
-  return '?'+kvPairs.join('&');
+  return `?${kvPairs.join('&').replace(/%20/g, '+')}`;
 }
 
-function decodeQueryString(qs) {
+function decodeQueryString(queryString) {
   const obj = {};
-  for (const kvString of qs.substr(1).split('&')) {
-    const kvArray = kvString.split('=');
-    const key = decodeURIComponent(kvArray[0]);
-    const value = decodeURIComponent(kvArray[1]);
-    const valueNum = parseFloat(value);
-    obj[key] = valueNum == value ? valueNum : value;
+  for (const kvString of queryString.replace(/^\?/, '').replace(/\+/g, '%20').split('&')) {
+    const [key, value] = kvString.split('=').map(decodeURIComponent);
+    if (key != null && value != null) {
+      const valueNum = parseFloat(value);
+      obj[key] = valueNum == value ? valueNum : value;
+    }
   }
   return obj;
 }
