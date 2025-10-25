@@ -355,34 +355,24 @@ function NumberInput({label, name, value, setValue, unit}) {
 }
 
 function encodeQueryString(obj) {
-  const kvPairs = [];
-  for (const [key, value] of Object.entries(obj)) {
-    kvPairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
-  }
-  return `?${kvPairs.join('&').replace(/%20/g, '+')}`;
+  const searchParams = new URLSearchParams(obj);
+  return `?${searchParams}`;
 }
 
 function decodeQueryString(queryString) {
-  const obj = {};
-  for (const kvString of queryString.replace(/^\?/, '').replace(/\+/g, '%20').split('&')) {
-    const [key, value] = kvString.split('=').map(decodeURIComponent);
-    if (key != null && value != null) {
-      const valueNum = parseFloat(value);
-      obj[key] = valueNum == value ? valueNum : value;
-    }
-  }
-  return obj;
+  const searchParams = new URLSearchParams(queryString);
+  return Object.fromEntries(searchParams.entries());
 }
 
 function App(initialValues) {
-  const [nCols, setNCols] = useState(initialValues.nCols);
-  const [nRows, setNRows] = useState(initialValues.nRows);
-  const [gridSize, setGridSize] = useState(initialValues.gridSize);
-  const [marginSize, setMarginSize] = useState(initialValues.marginSize);
-  const [sharpness, setSharpness] = useState(initialValues.sharpness);
-  const [nHolePunch, setNHolePunch] = useState(initialValues.nHolePunch);
-  const [holePunchSize, setHolePunchSize] = useState(initialValues.holePunchSize);
-  const [holePunchSpacing, setHolePunchSpacing] = useState(initialValues.holePunchSpacing);
+  const [nCols, setNCols] = useState(parseFloat(initialValues.nCols));
+  const [nRows, setNRows] = useState(parseFloat(initialValues.nRows));
+  const [gridSize, setGridSize] = useState(parseFloat(initialValues.gridSize));
+  const [marginSize, setMarginSize] = useState(parseFloat(initialValues.marginSize));
+  const [sharpness, setSharpness] = useState(parseFloat(initialValues.sharpness));
+  const [nHolePunch, setNHolePunch] = useState(parseFloat(initialValues.nHolePunch));
+  const [holePunchSize, setHolePunchSize] = useState(parseFloat(initialValues.holePunchSize));
+  const [holePunchSpacing, setHolePunchSpacing] = useState(parseFloat(initialValues.holePunchSpacing));
   const sieveParams = {nCols, nRows, gridSize, marginSize, sharpness, nHolePunch, holePunchSize, holePunchSpacing};
   const permalink = encodeQueryString(sieveParams);
   if (document.location.search) {
