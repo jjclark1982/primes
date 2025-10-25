@@ -164,11 +164,12 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nH
   const beadEls = [];
 
   for (let row = 0; row < nRows; row++) {
+    const rowOffset = 0; // (row % 2 == 1 ? cellWidth/2 : 0);
     for (let col = 0; col < nCols; col++) {
       const cellNum = (row * nCols) + col + 1;
 
       const cellPath = roundRectPath({
-        x: col*cellWidth + marginSize,
+        x: col*cellWidth + marginSize + rowOffset,
         y: row*cellHeight + marginSize,
         width: cellWidth - 2*marginSize,
         height: cellHeight - 2*marginSize,
@@ -204,7 +205,7 @@ function SieveLayer({nRows, nCols, marginSize, cellWidth, cellHeight, rx, ry, nH
         // non-cutout cells have engraved numbers (optionally)
         if (showNumbers) {
           textEls.push(html`<text class="legend-text"
-            x=${(col+0.5)*cellWidth}
+            x=${(col+0.5)*cellWidth + rowOffset}
             y=${(row+0.5)*cellHeight + cellHeight/9}
             text-anchor="middle"
           >${cellNum}</text>`);
